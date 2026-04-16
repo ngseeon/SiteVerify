@@ -1,7 +1,7 @@
-/* SiteVerify Phase 1 Styles */
+/* SiteVerify Blueprint Styles */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
     padding: 20px;
     display: flex;
@@ -10,61 +10,87 @@ body {
 }
 
 .logo-container {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
 .app-logo {
-    max-width: 200px; /* Fixed size for consistency */
+    max-width: 220px;
     height: auto;
+    display: block;
 }
 
-.settings-panel {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+.panel {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
     width: 100%;
     max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-top: 6px solid #737373; /* Blueprint Grey */
 }
 
-h2 {
-    color: #333;
-    font-size: 1.2rem;
+.section-title {
+    color: #737373; /* Blueprint Grey */
+    margin-top: 0;
+    font-size: 1.4rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.field-group {
     margin-bottom: 15px;
-    border-bottom: 2px solid #007bff;
-    padding-bottom: 5px;
 }
 
-.input-group input {
+label {
+    display: block;
+    font-size: 0.85rem;
+    color: #737373; /* Blueprint Grey */
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
     width: 100%;
     padding: 12px;
-    margin-bottom: 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding doesn't affect width */
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+input:focus {
+    outline: none;
+    border-color: #ff0000; /* Blueprint Red */
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: #ff0000; /* Blueprint Red */
     color: white;
     border: none;
-    padding: 15px;
+    padding: 16px;
     width: 100%;
-    max-width: 400px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: bold;
-    margin-top: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #cc0000;
 }
 
 .btn-secondary {
-    background-color: #28a745;
+    background-color: #737373; /* Blueprint Grey */
     color: white;
     border: none;
-    padding: 15px;
+    padding: 16px;
     width: 100%;
-    max-width: 400px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
     margin-top: 10px;
 }
