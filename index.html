@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v17.x</title>
+    <title>SiteVerify v17.8</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 </head>
@@ -15,14 +15,14 @@
             <div id="settings-gear" class="gear-icon">⚙</div>
         </div>
         <div class="logo-container">
-            <img src="siteverify_logo.png" alt="SiteVerify Logo" class="app-logo">
+            <img src="siteverify_logo.png" alt="Logo" class="app-logo">
         </div>
         <div class="header-bottom">
             <div class="location-group">
                 <span class="globe-icon">🌐</span>
                 <span id="location-name">Horizon Hills</span>
             </div>
-            <span id="live-clock">17 April 2026 12:13:10</span>
+            <span id="live-clock">17 April 2026 18:30:00</span>
         </div>
         <hr class="divider">
     </header>
@@ -30,53 +30,51 @@
     <main id="app-viewport">
         <section id="settings-screen" class="form-container" style="display:none;">
             <h2 class="section-title">System Settings</h2>
-            <div class="input-wrapper"><label>User Name</label><input type="text" id="userName"></div>
-            <div class="input-wrapper"><label>User Email</label><input type="email" id="userEmail"></div>
-            <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone"></div>
-            <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail"></div>
-            <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone"></div>
-            <div class="settings-actions">
+            <div class="field-group"><label>User Name</label><input type="text" id="userName"></div>
+            <div class="field-group"><label>User Email</label><input type="email" id="userEmail"></div>
+            <div class="field-group"><label>User Phone Number</label><input type="tel" id="userHandphone"></div>
+            <div class="field-group"><label>Recipient Email</label><input type="email" id="recipientEmail"></div>
+            <div class="field-group"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone"></div>
+            
+            <div class="fixed-action-bar">
                 <button id="save-settings" class="btn-red-standard">Save System Setting</button>
             </div>
         </section>
 
         <section id="menu-screen">
-            <div class="menu-grid">
+            <div class="fixed-action-bar">
                 <button id="nav-capture" class="btn-red-standard">Capture</button>
                 <button id="nav-history" class="btn-red-standard">History</button>
             </div>
         </section>
 
-        <section id="camera-screen" class="full-screen-ui" style="display:none;">
-            <div class="viewfinder">
-                <video id="video-feed" autoplay playsinline></video>
-                <canvas id="capture-canvas" style="display:none;"></canvas>
-            </div>
-            <div class="fixed-bottom-bar">
+        <section id="camera-screen" class="full-ui" style="display:none;">
+            <div class="viewfinder"><video id="video-feed" autoplay playsinline></video></div>
+            <div class="fixed-action-bar">
                 <button id="shutter-btn" class="btn-red-standard">Capture</button>
                 <button id="camera-back" class="btn-red-standard">Back</button>
             </div>
         </section>
 
-        <section id="pin-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area"><img id="pin-preview" class="fit-image"></div>
-            <div class="compact-pin-bar">
-                <div class="pin-display-small">Enter Security PIN: <span id="display-pin">----</span></div>
-                <input type="number" id="pin-input" class="line-input-thin" pattern="\d*" inputmode="numeric">
+        <section id="pin-screen" class="full-ui" style="display:none;">
+            <div class="preview-box"><img id="pin-preview" class="fit-img"></div>
+            <div class="compact-pin-area">
+                <div class="pin-text">Enter Security PIN: <span id="display-pin">----</span></div>
+                <input type="number" id="pin-input" class="minimal-line" pattern="\d*" inputmode="numeric">
             </div>
         </section>
 
-        <section id="confirm-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area"><img id="confirm-preview" class="fit-image"></div>
-            <div class="fixed-bottom-bar">
-                <button id="verify-generate-btn" class="btn-red-standard">Verify & Generate</button>
+        <section id="confirm-screen" class="full-ui" style="display:none;">
+            <div class="preview-box"><img id="confirm-preview" class="fit-img"></div>
+            <div class="fixed-action-bar">
+                <button id="verify-gen-btn" class="btn-red-standard">Verify & Generate</button>
             </div>
         </section>
 
-        <section id="preview-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area"><img id="final-image-preview" class="fit-image"></div>
-            <div class="fixed-bottom-bar">
-                <button id="save-to-device" class="btn-green-standard">Save to Device</button>
+        <section id="save-screen" class="full-ui" style="display:none;">
+            <div class="preview-box"><img id="final-preview" class="fit-img"></div>
+            <div class="fixed-action-bar">
+                <button id="save-device" class="btn-green-standard">Save to Device</button>
             </div>
         </section>
     </main>
