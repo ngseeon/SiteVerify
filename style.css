@@ -1,45 +1,45 @@
-:root { --primary-red: #ff0000; --text-grey: #737373; }
-body { font-family: Arial, sans-serif; margin: 0; overflow: hidden; background: #fff; }
+:root { --red: #ff0000; --grey: #737373; --bg: #f0f0f0; }
+* { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; margin: 0; background: #fff; overflow: hidden; }
 
-/* Blinking Alert for GPS */
-.gps-off { color: #ff0000; font-weight: bold; animation: blinker 1s linear infinite; }
-@keyframes blinker { 50% { opacity: 0; } }
-.gps-on { font-weight: bold; font-style: italic; }
-
-/* Header Design Lock */
-.app-header { background: #f0f0f0; padding: 10px 15px; border-bottom: 2px solid #ccc; height: 130px; box-sizing: border-box; }
-.header-top { display: flex; justify-content: space-between; font-size: 14px; }
-.gear-icon { font-size: 24px; cursor: pointer; }
-.logo-container { text-align: center; }
+/* GLOBAL HEADER LOCK */
+.app-header { background: var(--bg); padding: 10px 15px; height: 130px; position: fixed; top: 0; width: 100%; z-index: 100; border-bottom: 1px solid #ccc; }
+.header-top { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; }
+.logo-container { text-align: center; margin: 5px 0; }
 .app-logo { width: 180px; }
-.header-bottom { display: flex; justify-content: space-between; font-size: 13px; margin-top: 5px; }
-.divider { border: 0; border-top: 3px solid #737373; margin: 8px -15px 0 -15px; }
+.header-bottom { display: flex; justify-content: space-between; font-size: 13px; color: var(--grey); }
+.divider { border: 0; border-top: 3px solid var(--grey); margin: 5px -15px 0 -15px; }
 
-/* Settings Screen */
-.form-container { padding: 20px; background: white; height: calc(100vh - 130px); }
-.input-wrapper { margin-bottom: 15px; }
-.input-wrapper label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-.input-wrapper input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
+/* GPS BLINKING */
+.gps-off { color: var(--red); animation: blink 1s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
 
-/* Standardized Phase 1 Buttons */
+/* PROFESSIONAL BUTTON GRID */
+.fixed-action-bar { 
+    position: fixed; bottom: 25px; /* Safety Margin from Navigation Bar */
+    left: 0; width: 100%; display: flex; gap: 10px; padding: 0 15px; z-index: 200;
+}
 .btn-red-standard, .btn-green-standard { 
-    background: var(--primary-red); color: white; border: none; border-radius: 8px; 
-    padding: 14px 0; font-weight: bold; font-size: 16px; flex: 1; text-align: center;
+    flex: 1; height: 55px; border: none; border-radius: 10px; 
+    color: white; font-weight: bold; font-size: 17px; cursor: pointer; 
 }
+.btn-red-standard { background: var(--red); }
 .btn-green-standard { background: #28a745; }
-.menu-grid { display: flex; gap: 15px; padding: 25px 15px; }
 
-/* Ultra-Compact PIN Area */
-.full-screen-ui { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; display: flex; flex-direction: column; background: #fff; z-index: 1000; }
-.viewfinder, .preview-area { flex: 1; display: flex; align-items: center; justify-content: center; }
-.fit-image, #video-feed { width: 100%; height: 100%; object-fit: contain; }
+/* SETTINGS SPACING */
+.form-container { padding: 145px 20px 100px 20px; overflow-y: auto; height: 100vh; }
+.field-group { margin-bottom: 12px; }
+.field-group label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 4px; }
+.field-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
 
-.compact-pin-bar { 
-    background: #fff; padding: 5px 0 15px 0; display: flex; flex-direction: column; 
-    align-items: center; position: absolute; bottom: 10px; width: 100%;
+/* PIN OPTIMIZATION */
+.full-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; }
+.preview-box { flex: 1; margin-top: 130px; display: flex; align-items: center; justify-content: center; }
+.fit-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+.compact-pin-area { 
+    padding-bottom: 30px; display: flex; flex-direction: column; align-items: center; 
 }
-.pin-display-small { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
-#display-pin { color: var(--primary-red); font-size: 16px; }
-.line-input-thin { width: 85%; border: none; border-bottom: 2px solid #000; font-size: 20px; text-align: center; outline: none; }
-
-.fixed-bottom-bar { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #eee; }
+.pin-text { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+#display-pin { color: var(--red); font-size: 16px; }
+.minimal-line { width: 80%; border: none; border-bottom: 2px solid #000; font-size: 24px; text-align: center; outline: none; }
