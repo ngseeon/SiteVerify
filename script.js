@@ -1,73 +1,79 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. DATA PERSISTENCE CHECK
     const fields = ['userName', 'userEmail', 'userHandphone', 'recipientEmail', 'whatsappPhone'];
-    
-    function loadSavedData() {
-        let hasData = true;
+    const settingsScreen = document.getElementById('settings-screen');
+    const menuScreen = document.getElementById('menu-screen');
+    const gearIcon = document.getElementById('settings-gear');
+
+    // 1. DATA PERSISTENCE
+    function loadData() {
+        let completed = true;
         fields.forEach(id => {
-            const saved = localStorage.getItem(id);
-            if (saved) {
-                document.getElementById(id).value = saved;
+            const val = localStorage.getItem(id);
+            if (val) {
+                document.getElementById(id).value = val;
             } else {
-                hasData = false;
+                completed = false;
             }
         });
-        
-        // If data exists, go straight to Menu
-        if (hasData) {
-            document.getElementById('settings-screen').style.display = 'none';
-            document.getElementById('menu-screen').style.display = 'block';
-        }
+        if (completed) toggleScreen(false);
     }
 
-    // 2. SAVE SETTINGS LOGIC
+    function toggleScreen(showSettings) {
+        settingsScreen.style.display = showSettings ? 'block' : 'none';
+        menuScreen.style.display = showSettings ? 'none' : 'block';
+    }
+
+    // 2. GEAR ICON LOGIC (Unlock Settings)
+    gearIcon.addEventListener('click', () => toggleScreen(true));
+
+    // 3. SAVE LOGIC
     document.getElementById('save-settings').addEventListener('click', () => {
-        let allFilled = true;
+        let allValid = true;
         fields.forEach(id => {
             const val = document.getElementById(id).value;
-            if (!val) allFilled = false;
+            if (!val) allValid = false;
             localStorage.setItem(id, val);
         });
 
-        if (allFilled) {
-            document.getElementById('settings-screen').style.display = 'none';
-            document.getElementById('menu-screen').style.display = 'block';
+        if (allValid) {
+            toggleScreen(false);
         } else {
-            alert("Please fill all fields before saving.");
+            alert("Please fill in all five system setting fields.");
         }
     });
 
-    // 3. LIVE CLOCK
-    function updateClock() {
-        const now = new Date();
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        const dateStr = now.toLocaleDateString('en-GB', options);
-        const timeStr = now.toTimeString().split(' ')[0];
-        document.getElementById('live-clock').innerText = `${dateStr} ${timeStr}`;
+    // 4. CLOCK LOGIC
+    function startClock() {
+        const clockEl = document.getElementById('live-clock');
+        const update = () => {
+            const now = new Date();
+            const dateParts = now.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+            const timeParts = now.toTimeString().split(' ')[0];
+            clockEl.innerText = `${dateParts} ${timeParts}`;
+        };
+        setInterval(update, 1000);
+        update();
     }
-    setInterval(updateClock, 1000);
-    updateClock();
 
-    // 4. GPS STATUS MOCK (For Phase 1 Visuals)
-    function checkGPS() {
-        const gpsLabel = document.getElementById('gps-status');
+    // 5. GPS STATUS SENSOR
+    function initGPS() {
+        const gpsEl = document.getElementById('gps-status');
         if ("geolocation" in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                () => {
-                    gpsLabel.innerText = "GPS : ON";
-                    gpsLabel.className = "gps-on";
+            navigator.geolocation.watchPosition(
+                () => { 
+                    gpsEl.innerText = "GPS : ON"; 
+                    gpsEl.className = "gps-on"; 
                 },
-                () => {
-                    gpsLabel.innerText = "GPS : OFF";
-                    gpsLabel.className = "gps-off";
-                }
+                () => { 
+                    gpsEl.innerText = "GPS : OFF"; 
+                    gpsEl.className = "gps-off"; 
+                },
+                { enableHighAccuracy: true }
             );
         }
     }
-    checkGPS();
 
-    // 5. LOCATION NAME (Static for Phase 1 per design)
-    document.getElementById('location-name').innerText = "Horizon Hills";
-
-    loadSavedData();
+    startClock();
+    initGPS();
+    loadData();
 });
