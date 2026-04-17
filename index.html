@@ -9,7 +9,7 @@
 </head>
 <body>
 
-    <header class="app-header">
+    <header id="main-header" class="app-header">
         <div class="header-top">
             <span id="gps-status" class="gps-on">GPS : ON</span>
             <div id="settings-gear" class="gear-icon">⚙</div>
@@ -27,15 +27,15 @@
         <hr class="divider">
     </header>
 
-    <main class="content-area">
+    <main id="app-viewport">
         <section id="settings-screen" class="form-container">
             <h2 class="section-title">System Settings</h2>
-            <div class="input-wrapper"><label>User Name</label><input type="text" id="userName" placeholder="Enter full name"></div>
-            <div class="input-wrapper"><label>User Email</label><input type="email" id="userEmail" placeholder="name@example.com"></div>
-            <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone" placeholder="e.g. 0123456789"></div>
-            <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail" placeholder="recipient@example.com"></div>
-            <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone" placeholder="e.g. 0123456789"></div>
-            <button id="save-settings" class="btn-save">Save System Settings</button>
+            <div class="input-wrapper"><label>User Name</label><input type="text" id="userName"></div>
+            <div class="input-wrapper"><label>User Email</label><input type="email" id="userEmail"></div>
+            <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone"></div>
+            <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail"></div>
+            <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone"></div>
+            <button id="save-settings" class="btn-red-full">Save System Settings</button>
         </section>
 
         <section id="menu-screen" style="display:none;">
@@ -45,31 +45,35 @@
             </div>
         </section>
 
-        <section id="camera-screen" style="display:none;">
-            <div class="camera-container">
+        <section id="camera-screen" class="full-screen-ui" style="display:none;">
+            <div class="viewfinder">
                 <video id="video-feed" autoplay playsinline></video>
                 <canvas id="capture-canvas" style="display:none;"></canvas>
             </div>
             <div class="camera-controls">
-                <button id="shutter-btn" class="btn-red">Capture</button>
-                <button id="camera-back" class="btn-red">Back</button>
+                <button id="shutter-btn" class="btn-red-half">Capture</button>
+                <button id="camera-back" class="btn-red-half">Back</button>
             </div>
         </section>
 
-        <section id="pin-screen" class="overlay-screen" style="display:none;">
-            <div class="pin-box">
-                <h3>Verify Location</h3>
-                <p>Enter Security PIN: <b id="display-pin">----</b></p>
-                <input type="number" id="pin-input" placeholder="Enter 4-digit PIN">
-                <button id="verify-pin-btn" class="btn-save">Verify & Generate</button>
+        <section id="pin-screen" class="full-screen-ui" style="display:none;">
+            <div class="preview-area">
+                <img id="verify-preview" class="fit-image">
+            </div>
+            <div class="verification-bar">
+                <div class="pin-display">Enter Security PIN: <span id="display-pin">----</span></div>
+                <input type="number" id="pin-input" pattern="\d*" inputmode="numeric">
+                <button id="verify-pin-btn" class="btn-red-full">Verify & Generate</button>
             </div>
         </section>
 
-        <section id="preview-screen" style="display:none;">
-            <div class="preview-container">
-                <img id="final-image-preview" src="" alt="Final Stamped Image">
+        <section id="preview-screen" class="full-screen-ui" style="display:none;">
+            <div class="preview-area">
+                <img id="final-image-preview" class="fit-image">
             </div>
-            <button id="save-to-device" class="btn-save" style="background-color: #28a745;">Save to Device</button>
+            <div class="save-bar">
+                <button id="save-to-device" class="btn-green-full">Save to Device</button>
+            </div>
         </section>
     </main>
 
