@@ -22,26 +22,26 @@
                 <span class="globe-icon">🌐</span>
                 <span id="location-name">Horizon Hills</span>
             </div>
-            <span id="live-clock">17 April 2026 10:00:00</span>
+            <span id="live-clock">17 April 2026 12:13:10</span>
         </div>
         <hr class="divider">
     </header>
 
     <main id="app-viewport">
-        <section id="settings-screen" class="form-container">
+        <section id="settings-screen" class="form-container" style="display:none;">
             <h2 class="section-title">System Settings</h2>
             <div class="input-wrapper"><label>User Name</label><input type="text" id="userName"></div>
             <div class="input-wrapper"><label>User Email</label><input type="email" id="userEmail"></div>
             <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone"></div>
             <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail"></div>
             <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone"></div>
-            <button id="save-settings" class="btn-red-full">Save System Settings</button>
+            <button id="save-settings" class="btn-red-full">Save System Setting</button>
         </section>
 
-        <section id="menu-screen" style="display:none;">
+        <section id="menu-screen">
             <div class="menu-grid">
                 <button id="nav-capture" class="btn-action">Capture</button>
-                <button class="btn-action">History</button>
+                <button id="nav-history" class="btn-action">History</button>
             </div>
         </section>
 
@@ -58,12 +58,20 @@
 
         <section id="pin-screen" class="full-screen-ui" style="display:none;">
             <div class="preview-area">
-                <img id="verify-preview" class="fit-image">
+                <img id="pin-preview" class="fit-image">
             </div>
             <div class="verification-bar">
                 <div class="pin-display">Enter Security PIN: <span id="display-pin">----</span></div>
                 <input type="number" id="pin-input" pattern="\d*" inputmode="numeric">
-                <button id="verify-pin-btn" class="btn-red-full">Verify & Generate</button>
+            </div>
+        </section>
+
+        <section id="confirm-screen" class="full-screen-ui" style="display:none;">
+            <div class="preview-area">
+                <img id="confirm-preview" class="fit-image">
+            </div>
+            <div class="action-bar">
+                <button id="verify-generate-btn" class="btn-red-full">Verify & Generate</button>
             </div>
         </section>
 
