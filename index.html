@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SiteVerify v17.x</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -13,17 +14,15 @@
             <span id="gps-status" class="gps-on">GPS : ON</span>
             <div id="settings-gear" class="gear-icon">⚙</div>
         </div>
-        
         <div class="logo-container">
             <img src="siteverify_logo.png" alt="SiteVerify Logo" class="app-logo">
         </div>
-
         <div class="header-bottom">
             <div class="location-group">
                 <span class="globe-icon">🌐</span>
                 <span id="location-name">Horizon Hills</span>
             </div>
-            <span id="live-clock">17 April 2026 10:42:36</span>
+            <span id="live-clock">17 April 2026 10:00:00</span>
         </div>
         <hr class="divider">
     </header>
@@ -31,40 +30,46 @@
     <main class="content-area">
         <section id="settings-screen" class="form-container">
             <h2 class="section-title">System Settings</h2>
-            
-            <div class="input-wrapper">
-                <label>User Name</label>
-                <input type="text" id="userName" placeholder="Enter full name">
-            </div>
-
-            <div class="input-wrapper">
-                <label>User Email</label>
-                <input type="email" id="userEmail" placeholder="name@example.com">
-            </div>
-
-            <div class="input-wrapper">
-                <label>User Phone Number</label>
-                <input type="tel" id="userHandphone" placeholder="e.g. 0123456789">
-            </div>
-
-            <div class="input-wrapper">
-                <label>Recipient Email</label>
-                <input type="email" id="recipientEmail" placeholder="recipient@example.com">
-            </div>
-
-            <div class="input-wrapper">
-                <label>Recipient Phone Number</label>
-                <input type="tel" id="whatsappPhone" placeholder="e.g. 0123456789">
-            </div>
-
+            <div class="input-wrapper"><label>User Name</label><input type="text" id="userName" placeholder="Enter full name"></div>
+            <div class="input-wrapper"><label>User Email</label><input type="email" id="userEmail" placeholder="name@example.com"></div>
+            <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone" placeholder="e.g. 0123456789"></div>
+            <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail" placeholder="recipient@example.com"></div>
+            <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone" placeholder="e.g. 0123456789"></div>
             <button id="save-settings" class="btn-save">Save System Settings</button>
         </section>
 
         <section id="menu-screen" style="display:none;">
             <div class="menu-grid">
-                <button class="btn-action">Capture</button>
+                <button id="nav-capture" class="btn-action">Capture</button>
                 <button class="btn-action">History</button>
             </div>
+        </section>
+
+        <section id="camera-screen" style="display:none;">
+            <div class="camera-container">
+                <video id="video-feed" autoplay playsinline></video>
+                <canvas id="capture-canvas" style="display:none;"></canvas>
+            </div>
+            <div class="camera-controls">
+                <button id="shutter-btn" class="btn-red">Capture</button>
+                <button id="camera-back" class="btn-red">Back</button>
+            </div>
+        </section>
+
+        <section id="pin-screen" class="overlay-screen" style="display:none;">
+            <div class="pin-box">
+                <h3>Verify Location</h3>
+                <p>Enter Security PIN: <b id="display-pin">----</b></p>
+                <input type="number" id="pin-input" placeholder="Enter 4-digit PIN">
+                <button id="verify-pin-btn" class="btn-save">Verify & Generate</button>
+            </div>
+        </section>
+
+        <section id="preview-screen" style="display:none;">
+            <div class="preview-container">
+                <img id="final-image-preview" src="" alt="Final Stamped Image">
+            </div>
+            <button id="save-to-device" class="btn-save" style="background-color: #28a745;">Save to Device</button>
         </section>
     </main>
 
