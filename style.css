@@ -1,30 +1,66 @@
-/* HEADER LOCK: Grey background now touches the divider */
+/* GLOBAL RESET */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #fff; overflow: hidden; }
+
+/* HEADER LOCK */
 .app-header { 
     background: #f2f2f2; 
-    padding: 10px 0 0 0; /* Removed bottom padding */
-    height: 130px; 
+    height: 140px; 
+    width: 100%; 
     position: fixed; 
     top: 0; 
-    width: 100%; 
-    z-index: 100; 
+    z-index: 1000;
+}
+
+.header-top-row {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    padding: 5px 12px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
-.header-top, .header-bottom { 
-    padding: 0 15px; /* Keep text away from edges */
+.logo-area {
+    text-align: center;
+    margin-top: -5px;
 }
 
-.logo-container { 
-    flex-grow: 1; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+.standard-logo {
+    width: 180px; /* Fixed width to prevent exploding size */
+    height: auto;
 }
 
-.divider { 
-    border: 0; 
-    border-top: 3px solid #737373; 
-    margin: 5px 0 0 0; /* Zero margin ensures it touches the grey bg */
+.header-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 12px;
+    font-size: 12px;
+    color: #555;
+}
+
+.header-line {
+    border: 0;
+    border-top: 3px solid #737373;
+    margin-top: 5px;
+}
+
+/* BUTTONS */
+.fixed-action-bar {
+    position: fixed;
+    bottom: 35px;
     width: 100%;
+    display: flex;
+    gap: 12px;
+    padding: 0 15px;
+}
+
+.btn-red-standard {
+    flex: 1;
+    height: 55px;
+    background: #ff0000;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
 }
