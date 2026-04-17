@@ -1,121 +1,33 @@
-/* SiteVerify Professional Palette */
-:root {
-    --primary-red: #ff0000;
-    --text-grey: #737373;
-    --bg-light: #f8f8f8;
-}
+:root { --primary-red: #ff0000; --text-grey: #737373; --bg-light: #f8f8f8; }
+body { font-family: Arial, sans-serif; background-color: var(--bg-light); margin: 0; color: var(--text-grey); }
 
-body {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background-color: var(--bg-light);
-    margin: 0;
-    padding: 0;
-    color: var(--text-grey);
-}
-
-/* Header Layout per Scr_001_1.PNG */
-.app-header {
-    background: #f0f0f0;
-    padding: 8px 15px 0 15px;
-}
-
-.header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-style: italic;
-    font-weight: bold;
-    font-size: 13px;
-}
-
+.app-header { background: #f0f0f0; padding: 8px 15px 0 15px; }
+.header-top { display: flex; justify-content: space-between; font-style: italic; font-weight: bold; font-size: 13px; }
 .gps-off { color: var(--primary-red); animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0; } }
+.gear-icon { font-size: 20px; cursor: pointer; }
+.logo-container { text-align: center; padding: 5px 0; }
+.app-logo { width: 180px; }
+.header-bottom { display: flex; justify-content: space-between; font-size: 12px; font-style: italic; padding: 4px 0; }
+.divider { border: 0; border-top: 3px solid var(--text-grey); margin: 0 -15px; }
 
-.gear-icon {
-    font-size: 20px;
-    cursor: pointer;
-    color: var(--text-grey);
-}
+.content-area { padding: 15px; }
+.input-wrapper { margin-bottom: 10px; }
+label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+.btn-save, .btn-action, .btn-red { background-color: var(--primary-red); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
+.btn-save { width: 100%; padding: 12px; font-size: 16px; }
+.menu-grid { display: flex; gap: 10px; }
+.btn-action { flex: 1; padding: 12px 0; font-size: 15px; }
 
-.logo-container {
-    text-align: center;
-    padding: 5px 0;
-}
+/* Camera UI */
+#camera-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; }
+#video-feed { flex: 1; object-fit: cover; width: 100%; }
+.camera-controls { height: 80px; display: flex; justify-content: space-around; align-items: center; background: #fff; padding: 10px; }
+.btn-red { padding: 10px 40px; font-size: 16px; height: 50px; min-width: 140px; }
 
-.app-logo {
-    width: 180px;
-    height: auto;
-}
+/* PIN Overlay */
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+.pin-box { background: white; padding: 25px; border-radius: 10px; text-align: center; width: 80%; }
 
-.header-bottom {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-style: italic;
-    padding: 4px 0;
-}
-
-.divider {
-    border: 0;
-    border-top: 3px solid var(--text-grey);
-    margin: 0 -15px;
-}
-
-/* Professional Form & Menu */
-.content-area {
-    padding: 20px;
-}
-
-.section-title {
-    font-size: 18px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
-}
-
-.input-wrapper { margin-bottom: 12px; }
-label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 3px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.btn-save {
-    background-color: var(--primary-red);
-    color: white;
-    width: 100%;
-    padding: 14px;
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-/* Main Menu Buttons - Matching image 6 proportions */
-.menu-grid {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.btn-action {
-    background-color: var(--primary-red);
-    color: white;
-    flex: 1;
-    padding: 12px 0;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    font-size: 15px;
-    text-align: center;
-}
+#final-image-preview { width: 100%; border-radius: 5px; margin-bottom: 15px; border: 2px solid #ddd; }
