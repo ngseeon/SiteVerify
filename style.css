@@ -1,68 +1,18 @@
-/* STOP OVERFLOW & SLIDING */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { 
-    font-family: Arial, sans-serif; 
-    background: #fff; 
-    overflow: hidden; 
-    width: 100vw; 
-    height: 100vh; 
-}
+/* ... Keep your previous Header and Button CSS ... */
 
-/* HEADER LOCKDOWN */
-#main-header {
-    background: #f2f2f2;
-    height: 130px;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    z-index: 100;
-    padding: 5px 0;
-}
+.screen { position: absolute; top: 130px; bottom: 0; width: 100%; overflow-y: auto; background: #fff; }
 
-.header-top, .header-bottom { 
-    display: flex; 
-    justify-content: space-between; 
-    padding: 0 15px; 
+/* SETTINGS STYLING */
+.settings-content { padding: 20px; }
+.settings-content h2 { margin-bottom: 15px; font-size: 22px; }
+.input-group label { display: block; font-weight: bold; margin-top: 10px; font-size: 14px; }
+.input-group input { 
+    width: 100%; padding: 12px; margin-top: 5px; 
+    border: 1px solid #ccc; border-radius: 8px; font-size: 16px;
 }
+#save-settings { margin-top: 25px; width: 100%; height: 50px; }
 
-.header-top { font-weight: bold; font-size: 14px; }
-.header-bottom { font-size: 12px; color: #555; margin-top: 5px; }
-
-/* LOGO SIZE CONTROL: Fixes the 'exploded' image */
-.logo-container {
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.app-logo {
-    max-width: 180px; /* Forces width back to professional size */
-    max-height: 55px;
-    object-fit: contain;
-}
-
-.header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
-
-/* BUTTONS: Safety Zone Fix */
-.button-bar {
-    position: fixed;
-    bottom: 35px; /* Above Android navigation bar */
-    left: 0;
-    width: 100%;
-    display: flex;
-    gap: 12px;
-    padding: 0 15px;
-}
-
-.btn-red {
-    flex: 1; /* Makes buttons equal width */
-    height: 58px;
-    background: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: bold;
-    font-size: 18px;
-    cursor: pointer;
-}
+/* CAMERA STYLING */
+#camera-screen { background: #000; top: 0; z-index: 200; }
+.viewfinder { height: 80%; display: flex; align-items: center; justify-content: center; }
+#video-feed { width: 100%; height: 100%; object-fit: cover; }
