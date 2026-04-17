@@ -1,45 +1,30 @@
-:root { --red: #ff0000; --grey: #737373; --bg: #f0f0f0; }
-* { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; margin: 0; background: #fff; overflow: hidden; }
-
-/* GLOBAL HEADER LOCK */
-.app-header { background: var(--bg); padding: 10px 15px; height: 130px; position: fixed; top: 0; width: 100%; z-index: 100; border-bottom: 1px solid #ccc; }
-.header-top { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; }
-.logo-container { text-align: center; margin: 5px 0; }
-.app-logo { width: 180px; }
-.header-bottom { display: flex; justify-content: space-between; font-size: 13px; color: var(--grey); }
-.divider { border: 0; border-top: 3px solid var(--grey); margin: 5px -15px 0 -15px; }
-
-/* GPS BLINKING */
-.gps-off { color: var(--red); animation: blink 1s step-end infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-
-/* PROFESSIONAL BUTTON GRID */
-.fixed-action-bar { 
-    position: fixed; bottom: 25px; /* Safety Margin from Navigation Bar */
-    left: 0; width: 100%; display: flex; gap: 10px; padding: 0 15px; z-index: 200;
+/* HEADER LOCK: Grey background now touches the divider */
+.app-header { 
+    background: #f2f2f2; 
+    padding: 10px 0 0 0; /* Removed bottom padding */
+    height: 130px; 
+    position: fixed; 
+    top: 0; 
+    width: 100%; 
+    z-index: 100; 
+    display: flex;
+    flex-direction: column;
 }
-.btn-red-standard, .btn-green-standard { 
-    flex: 1; height: 55px; border: none; border-radius: 10px; 
-    color: white; font-weight: bold; font-size: 17px; cursor: pointer; 
+
+.header-top, .header-bottom { 
+    padding: 0 15px; /* Keep text away from edges */
 }
-.btn-red-standard { background: var(--red); }
-.btn-green-standard { background: #28a745; }
 
-/* SETTINGS SPACING */
-.form-container { padding: 145px 20px 100px 20px; overflow-y: auto; height: 100vh; }
-.field-group { margin-bottom: 12px; }
-.field-group label { display: block; font-weight: bold; font-size: 14px; margin-bottom: 4px; }
-.field-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-
-/* PIN OPTIMIZATION */
-.full-ui { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; }
-.preview-box { flex: 1; margin-top: 130px; display: flex; align-items: center; justify-content: center; }
-.fit-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-.compact-pin-area { 
-    padding-bottom: 30px; display: flex; flex-direction: column; align-items: center; 
+.logo-container { 
+    flex-grow: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
 }
-.pin-text { font-size: 14px; font-weight: bold; margin-bottom: 5px; }
-#display-pin { color: var(--red); font-size: 16px; }
-.minimal-line { width: 80%; border: none; border-bottom: 2px solid #000; font-size: 24px; text-align: center; outline: none; }
+
+.divider { 
+    border: 0; 
+    border-top: 3px solid #737373; 
+    margin: 5px 0 0 0; /* Zero margin ensures it touches the grey bg */
+    width: 100%;
+}
