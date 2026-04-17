@@ -1,48 +1,73 @@
-// SiteVerify Master Blueprint - Phase 1 & 2 Logic
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Identify Elements
-    const saveSettingsBtn = document.getElementById('save-settings');
-    const settingsScreen = document.getElementById('settings-screen');
-    const mainScreen = document.getElementById('main-screen');
-
-    const userName = document.getElementById('userName');
-    const userEmail = document.getElementById('userEmail');
-    const userHandphone = document.getElementById('userHandphone');
-    const recipientEmail = document.getElementById('recipientEmail');
-    const whatsappPhone = document.getElementById('whatsappPhone');
-
-    // 2. Logic to Save Settings and Switch Screen
-    saveSettingsBtn.addEventListener('click', () => {
-        // Validation: Ensure all 5 fields are filled
-        if (!userName.value || !userEmail.value || !userHandphone.value || !recipientEmail.value || !whatsappPhone.value) {
-            alert("Error: All five system setting fields must be completed before proceeding.");
-            return;
-        }
-
-        // Lock data in memory (Phase 1)
-        const userSettings = {
-            name: userName.value,
-            email: userEmail.value,
-            phone: userHandphone.value,
-            targetEmail: recipientEmail.value,
-            targetWhatsApp: whatsappPhone.value
-        };
+    // 1. DATA PERSISTENCE CHECK
+    const fields = ['userName', 'userEmail', 'userHandphone', 'recipientEmail', 'whatsappPhone'];
+    
+    function loadSavedData() {
+        let hasData = true;
+        fields.forEach(id => {
+            const saved = localStorage.getItem(id);
+            if (saved) {
+                document.getElementById(id).value = saved;
+            } else {
+                hasData = false;
+            }
+        });
         
-        console.log("System Settings Saved:", userSettings);
+        // If data exists, go straight to Menu
+        if (hasData) {
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'block';
+        }
+    }
 
-        // Transition: Hide Settings, Show Camera/Save buttons
-        settingsScreen.style.display = 'none';
-        mainScreen.style.display = 'block';
+    // 2. SAVE SETTINGS LOGIC
+    document.getElementById('save-settings').addEventListener('click', () => {
+        let allFilled = true;
+        fields.forEach(id => {
+            const val = document.getElementById(id).value;
+            if (!val) allFilled = false;
+            localStorage.setItem(id, val);
+        });
+
+        if (allFilled) {
+            document.getElementById('settings-screen').style.display = 'none';
+            document.getElementById('menu-screen').style.display = 'block';
+        } else {
+            alert("Please fill all fields before saving.");
+        }
     });
 
-    // 3. Phase 2: Camera Logic Placeholder
-    document.getElementById('open-camera').addEventListener('click', () => {
-        alert("Workflow Step 1: Opening Site Camera...");
-        // Future code for QR scanning & Camera capture will be placed here
-    });
+    // 3. LIVE CLOCK
+    function updateClock() {
+        const now = new Date();
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        const dateStr = now.toLocaleDateString('en-GB', options);
+        const timeStr = now.toTimeString().split(' ')[0];
+        document.getElementById('live-clock').innerText = `${dateStr} ${timeStr}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    // 4. Phase 2: Save to Device Logic Placeholder
-    document.getElementById('save-device').addEventListener('click', () => {
-        alert("Workflow Step 5: Saving Locked Data to Device...");
-    });
+    // 4. GPS STATUS MOCK (For Phase 1 Visuals)
+    function checkGPS() {
+        const gpsLabel = document.getElementById('gps-status');
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                () => {
+                    gpsLabel.innerText = "GPS : ON";
+                    gpsLabel.className = "gps-on";
+                },
+                () => {
+                    gpsLabel.innerText = "GPS : OFF";
+                    gpsLabel.className = "gps-off";
+                }
+            );
+        }
+    }
+    checkGPS();
+
+    // 5. LOCATION NAME (Static for Phase 1 per design)
+    document.getElementById('location-name').innerText = "Horizon Hills";
+
+    loadSavedData();
 });
