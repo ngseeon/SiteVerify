@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Live Clock
+    // 1. LIVE CLOCK
     setInterval(() => {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleString('en-GB', {
@@ -8,14 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 1000);
 
-    // 2. Navigation
-    document.getElementById('settings-gear').onclick = () => {
-        document.getElementById('menu-screen').style.display = 'none';
-        document.getElementById('settings-screen').style.display = 'block';
-    };
+    // 2. GPS MONITOR
+    navigator.geolocation.watchPosition(
+        () => { document.getElementById('gps-status').innerText = "GPS : ON"; },
+        () => { document.getElementById('gps-status').innerText = "GPS : OFF"; }
+    );
 
-    document.getElementById('save-settings').onclick = () => {
-        document.getElementById('settings-screen').style.display = 'none';
-        document.getElementById('menu-screen').style.display = 'block';
-    };
+    // 3. NAVIGATION
+    document.getElementById('settings-gear').onclick = () => alert("Opening Settings...");
+    document.getElementById('nav-capture').onclick = () => alert("Opening Camera...");
 });
