@@ -1,37 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v17.9</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<header id="main-header">
+    <div class="header-top">
+        <span id="gps-status">GPS : ON</span>
+        <span id="settings-gear" style="cursor:pointer">⚙</span>
+    </div>
+    <div class="logo-container">
+        <img src="siteverify_logo.png" alt="Logo" class="app-logo">
+    </div>
+    <div class="header-bottom">
+        <span>🌐 <span id="location-name">Horizon Hills</span></span>
+        <span id="live-clock">--:--:--</span>
+    </div>
+    <hr class="header-line">
+</header>
 
-    <header id="main-header">
-        <div class="header-top">
-            <span id="gps-status" class="gps-on">GPS : ON</span>
-            <span id="settings-gear">⚙</span>
-        </div>
-        <div class="logo-container">
-            <img src="siteverify_logo.png" alt="Logo" class="app-logo">
-        </div>
-        <div class="header-bottom">
-            <span>🌐 <span id="location-name">Horizon Hills</span></span>
-            <span id="live-clock">--:--:--</span>
-        </div>
-        <hr class="header-line">
-    </header>
+<section id="menu-screen" class="screen">
+    <div class="button-bar">
+        <button id="nav-capture" class="btn-red">Capture</button>
+        <button id="nav-history" class="btn-red">History</button>
+    </div>
+</section>
 
-    <main id="app-content">
-        <div id="menu-screen" class="active-screen">
-            <div class="button-bar">
-                <button id="nav-capture" class="btn-red">Capture</button>
-                <button id="nav-history" class="btn-red">History</button>
-            </div>
+<section id="settings-screen" class="screen" style="display:none">
+    <div class="settings-content">
+        <h2>System Settings</h2>
+        <div class="input-group">
+            <label>User Name</label>
+            <input type="text" placeholder="NG SEE ON">
+            <label>User Email</label>
+            <input type="email" placeholder="ngseeon@gmail.com">
+            <label>User Phone Number</label>
+            <input type="text" placeholder="+6012738393">
+            <label>Recipient Email</label>
+            <input type="email" placeholder="seeon.ng@gmail.com">
+            <label>Recipient Phone Number</label>
+            <input type="text" placeholder="+60175783133">
         </div>
-    </main>
+        <button id="save-settings" class="btn-red">Save System Setting</button>
+    </div>
+</section>
 
-    <script src="script.js"></script>
-</body>
-</html>
+<section id="camera-screen" class="screen" style="display:none">
+    <div class="viewfinder">
+        <video id="video-feed" autoplay playsinline></video>
+    </div>
+    <div class="button-bar">
+        <button id="shutter-btn" class="btn-red">Capture</button>
+        <button id="camera-back" class="btn-red">Back</button>
+    </div>
+</section>
