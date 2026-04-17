@@ -1,38 +1,45 @@
-:root { --primary-red: #ff0000; --text-grey: #737373; --bg-light: #f8f8f8; }
-body { font-family: Arial, sans-serif; background-color: var(--bg-light); margin: 0; overflow: hidden; }
+:root { --primary-red: #ff0000; --text-grey: #737373; }
+body { font-family: Arial, sans-serif; margin: 0; overflow: hidden; background: #fff; }
 
-/* Header Alignment */
-.app-header { background: #f0f0f0; padding: 8px 15px; border-bottom: 2px solid #ccc; height: 130px; box-sizing: border-box; }
-.header-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; font-style: italic; }
-.gear-icon { font-size: 22px; cursor: pointer; color: #555; }
-.logo-container { text-align: center; padding: 5px 0; }
+/* Blinking Alert for GPS */
+.gps-off { color: #ff0000; font-weight: bold; animation: blinker 1s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+.gps-on { font-weight: bold; font-style: italic; }
+
+/* Header Design Lock */
+.app-header { background: #f0f0f0; padding: 10px 15px; border-bottom: 2px solid #ccc; height: 130px; box-sizing: border-box; }
+.header-top { display: flex; justify-content: space-between; font-size: 14px; }
+.gear-icon { font-size: 24px; cursor: pointer; }
+.logo-container { text-align: center; }
 .app-logo { width: 180px; }
-.header-bottom { display: flex; justify-content: space-between; font-size: 12px; color: #555; }
-.divider { border: 0; border-top: 3px solid #737373; margin: 5px -15px 0 -15px; }
+.header-bottom { display: flex; justify-content: space-between; font-size: 13px; margin-top: 5px; }
+.divider { border: 0; border-top: 3px solid #737373; margin: 8px -15px 0 -15px; }
 
 /* Settings Screen */
-.form-container { padding: 15px; background: white; height: calc(100vh - 130px); overflow-y: auto; }
-.input-wrapper { margin-bottom: 12px; display: flex; flex-direction: column; }
-.input-wrapper label { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
-.input-wrapper input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
+.form-container { padding: 20px; background: white; height: calc(100vh - 130px); }
+.input-wrapper { margin-bottom: 15px; }
+.input-wrapper label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+.input-wrapper input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 16px; }
 
-/* Standardized Buttons */
+/* Standardized Phase 1 Buttons */
 .btn-red-standard, .btn-green-standard { 
-    background: var(--primary-red); color: white; border: none; border-radius: 6px; 
-    padding: 12px 0; font-weight: bold; font-size: 16px; flex: 1; text-align: center;
+    background: var(--primary-red); color: white; border: none; border-radius: 8px; 
+    padding: 14px 0; font-weight: bold; font-size: 16px; flex: 1; text-align: center;
 }
 .btn-green-standard { background: #28a745; }
-.menu-grid { display: flex; gap: 10px; padding: 20px; background: white; }
+.menu-grid { display: flex; gap: 15px; padding: 25px 15px; }
 
-/* Full Screen UI Logic */
-.full-screen-ui { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: #fff; display: flex; flex-direction: column; z-index: 1000; }
-.viewfinder, .preview-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-#video-feed, .fit-image { width: 100%; height: 100%; object-fit: contain; }
+/* Ultra-Compact PIN Area */
+.full-screen-ui { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; display: flex; flex-direction: column; background: #fff; z-index: 1000; }
+.viewfinder, .preview-area { flex: 1; display: flex; align-items: center; justify-content: center; }
+.fit-image, #video-feed { width: 100%; height: 100%; object-fit: contain; }
 
-.fixed-bottom-bar { background: #fff; padding: 12px 15px; display: flex; gap: 10px; border-top: 1px solid #eee; }
-.flex-col { flex-direction: column; align-items: center; }
+.compact-pin-bar { 
+    background: #fff; padding: 5px 0 15px 0; display: flex; flex-direction: column; 
+    align-items: center; position: absolute; bottom: 10px; width: 100%;
+}
+.pin-display-small { font-weight: bold; font-size: 14px; margin-bottom: 5px; }
+#display-pin { color: var(--primary-red); font-size: 16px; }
+.line-input-thin { width: 85%; border: none; border-bottom: 2px solid #000; font-size: 20px; text-align: center; outline: none; }
 
-/* Space-Saving Line Input */
-.line-input { width: 90%; border: none; border-bottom: 2px solid #000; font-size: 28px; text-align: center; padding: 5px 0; outline: none; margin-bottom: 10px; }
-.pin-display { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
-#display-pin { color: var(--primary-red); }
+.fixed-bottom-bar { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #eee; }
