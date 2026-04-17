@@ -1,107 +1,88 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const fields = ['userName', 'userEmail', 'userHandphone', 'recipientEmail', 'whatsappPhone'];
     let currentLat = 0, currentLon = 0, generatedPin = "", stream = null;
+    const canvas = document.createElement('canvas');
 
     const showScreen = (id) => {
         document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = (id === 'menu-screen' || id === 'settings-screen') ? 'block' : 'flex';
-        document.getElementById('main-header').style.display = (['menu-screen', 'settings-screen'].includes(id)) ? 'block' : 'none';
+        document.getElementById(id).style.display = (id.includes('screen')) ? 'flex' : 'block';
+        if (id === 'settings-screen') document.getElementById(id).style.display = 'block';
         if (id !== 'camera-screen') stopCamera();
     };
 
-    // Restoration: Header Navigation & GPS
-    document.getElementById('settings-gear').addEventListener('click', () => showScreen('settings-screen'));
-    document.getElementById('save-settings').addEventListener('click', () => {
-        fields.forEach(f => localStorage.setItem(f, document.getElementById(f).value));
+    // SYSTEM SETTINGS PERSISTENCE
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('save-settings').onclick = () => {
+        ['userName', 'userEmail', 'userHandphone', 'recipientEmail', 'whatsappPhone'].forEach(id => {
+            localStorage.setItem(id, document.getElementById(id).value);
+        });
         showScreen('menu-screen');
-    });
+    };
 
-    // Camera Logic
+    // CAMERA LOGIC
     async function startCamera(mode) {
         if (stream) stopCamera();
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode, width: 1280, height: 720 } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
         document.getElementById('video-feed').srcObject = stream;
     }
-
     function stopCamera() { if (stream) stream.getTracks().forEach(t => t.stop()); }
 
-    document.getElementById('nav-capture').addEventListener('click', () => { showScreen('camera-screen'); startCamera('environment'); });
-    document.getElementById('camera-back').addEventListener('click', () => showScreen('menu-screen'));
+    document.getElementById('nav-capture').onclick = () => { showScreen('camera-screen'); startCamera('environment'); };
+    document.getElementById('camera-back').onclick = () => showScreen('menu-screen');
 
-    document.getElementById('shutter-btn').addEventListener('click', async () => {
+    document.getElementById('shutter-btn').onclick = async () => {
         const video = document.getElementById('video-feed');
-        const canvas = document.getElementById('capture-canvas');
-        const ctx = canvas.getContext('2d');
         canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
         ctx.drawImage(video, 0, 0);
 
         stopCamera();
-        await startCamera('user');
+        await startCamera('user'); // Selfie switch
         setTimeout(() => {
-            const sW = canvas.width * 0.3; const sH = (video.videoHeight / video.videoWidth) * sW;
-            ctx.drawImage(video, 20, canvas.height - sH - 20, sW, sH);
-            
-            // PIN Generation
-            const latF = currentLat.toString().split('.')[1] || "0";
-            const lonF = currentLon.toString().split('.')[1] || "0";
-            generatedPin = (latF + lonF).split('').reduce((a,b) => parseInt(a) + parseInt(b), 0).toString().slice(-4).padStart(4, '0');
-            
+            ctx.drawImage(video, 20, canvas.height - 220, 300, 200); // Overlay selfie
+            generatedPin = Math.floor(1000 + Math.random() * 9000).toString(); // PIN Logic
             document.getElementById('display-pin').innerText = generatedPin;
             document.getElementById('pin-preview').src = canvas.toDataURL('image/jpeg');
             showScreen('pin-screen');
-        }, 450);
-    });
+        }, 500);
+    };
 
-    // Ultra-Compact Verification Flow
-    document.getElementById('pin-input').addEventListener('input', (e) => {
+    // PIN VERIFICATION
+    document.getElementById('pin-input').oninput = (e) => {
         if (e.target.value === generatedPin) {
-            document.getElementById('confirm-preview').src = document.getElementById('pin-preview').src;
+            document.getElementById('confirm-preview').src = canvas.toDataURL('image/jpeg');
             showScreen('confirm-screen');
             e.target.value = "";
         }
-    });
+    };
 
-    document.getElementById('verify-generate-btn').addEventListener('click', async () => {
-        const canvas = document.getElementById('capture-canvas');
-        const ctx = canvas.getContext('2d');
-        const qrText = `User: ${localStorage.getItem('userName')}\nGPS: ${currentLat},${currentLon}`;
-        
+    document.getElementById('verify-gen-btn').onclick = async () => {
+        const qrText = `User: ${localStorage.getItem('userName')} | GPS: ${currentLat},${currentLon}`;
         const qrCanvas = document.createElement('canvas');
-        await QRCode.toCanvas(qrCanvas, qrText, { width: canvas.width * 0.2, margin: 1 });
-        ctx.drawImage(qrCanvas, canvas.width - qrCanvas.width - 20, canvas.height - qrCanvas.height - 20);
-        
-        document.getElementById('final-image-preview').src = canvas.toDataURL('image/jpeg');
-        showScreen('preview-screen');
-    });
+        await QRCode.toCanvas(qrCanvas, qrText, { width: 150 });
+        canvas.getContext('2d').drawImage(qrCanvas, canvas.width - 170, canvas.height - 170);
+        document.getElementById('final-preview').src = canvas.toDataURL('image/jpeg');
+        showScreen('save-screen');
+    };
 
-    document.getElementById('save-to-device').addEventListener('click', () => {
-        const a = document.createElement('a');
-        a.href = document.getElementById('final-image-preview').src;
-        a.download = `siteverify_logo.png`; //
-        a.click();
+    document.getElementById('save-device').onclick = () => {
+        const link = document.createElement('a');
+        link.download = 'siteverify_logo.png';
+        link.href = document.getElementById('final-preview').src;
+        link.click();
         showScreen('menu-screen');
+    };
+
+    // LIVE SERVICES
+    setInterval(() => {
+        document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB');
+    }, 1000);
+
+    navigator.geolocation.watchPosition(p => {
+        currentLat = p.coords.latitude; currentLon = p.coords.longitude;
+        document.getElementById('gps-status').className = 'gps-on';
+        document.getElementById('gps-status').innerText = 'GPS : ON';
+    }, () => {
+        document.getElementById('gps-status').className = 'gps-off';
+        document.getElementById('gps-status').innerText = 'GPS : OFF';
     });
-
-    function init() {
-        fields.forEach(f => { if(localStorage.getItem(f)) document.getElementById(f).value = localStorage.getItem(f); });
-        
-        // Live Clock
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('live-clock').innerText = now.toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}) + " " + now.toTimeString().split(' ')[0];
-        }, 1000);
-
-        // Blinking GPS Alert Logic
-        navigator.geolocation.watchPosition(p => {
-            currentLat = p.coords.latitude; currentLon = p.coords.longitude;
-            const status = document.getElementById('gps-status');
-            status.innerText = "GPS : ON";
-            status.className = "gps-on";
-        }, () => {
-            const status = document.getElementById('gps-status');
-            status.innerText = "GPS : OFF";
-            status.className = "gps-off";
-        });
-    }
-    init();
 });
