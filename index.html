@@ -8,24 +8,45 @@
     <header id="main-header">
         <div class="header-top">
             <span id="gps-status">GPS : ON</span>
-            <span id="settings-gear">⚙</span>
+            <span id="settings-gear" style="cursor:pointer">⚙</span>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" class="app-logo">
         </div>
         <div class="header-bottom">
             <span>🌐 Horizon Hills</span>
-            <span id="live-clock">17 April 2026 21:50:00</span>
+            <span id="live-clock">--:--:--</span>
         </div>
         <hr class="header-line">
     </header>
 
-    <main id="menu-screen">
+    <section id="menu-screen" class="app-screen">
         <div class="action-bar">
             <button id="nav-capture" class="btn-red">Capture</button>
             <button id="nav-history" class="btn-red">History</button>
         </div>
-    </main>
+    </section>
+
+    <section id="settings-screen" class="app-screen" style="display:none">
+        <div class="settings-padding">
+            <h2>System Settings</h2>
+            <div class="input-field">
+                <label>User Name</label>
+                <input type="text" value="NG SEE ON">
+            </div>
+            <button id="save-settings" class="btn-red">Save System Setting</button>
+        </div>
+    </section>
+
+    <section id="camera-screen" class="app-screen" style="display:none; background:#000;">
+        <div class="camera-preview">
+            <video id="video-feed" autoplay playsinline></video>
+        </div>
+        <div class="action-bar">
+            <button id="shutter" class="btn-red">Capture</button>
+            <button id="cam-back" class="btn-red">Back</button>
+        </div>
+    </section>
 
     <script src="script.js"></script>
 </body>
