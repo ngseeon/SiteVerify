@@ -1,33 +1,38 @@
 :root { --primary-red: #ff0000; --text-grey: #737373; --bg-light: #f8f8f8; }
-body { font-family: Arial, sans-serif; background-color: var(--bg-light); margin: 0; color: var(--text-grey); }
+body { font-family: Arial, sans-serif; background-color: var(--bg-light); margin: 0; overflow: hidden; }
 
-.app-header { background: #f0f0f0; padding: 8px 15px 0 15px; }
-.header-top { display: flex; justify-content: space-between; font-style: italic; font-weight: bold; font-size: 13px; }
+/* Header Styling */
+.app-header { background: #f0f0f0; padding: 8px 15px 0 15px; height: 120px; box-sizing: border-box; }
+.header-top { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; }
 .gps-off { color: var(--primary-red); animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: 0; } }
-.gear-icon { font-size: 20px; cursor: pointer; }
-.logo-container { text-align: center; padding: 5px 0; }
-.app-logo { width: 180px; }
+.app-logo { width: 180px; display: block; margin: 0 auto; }
 .header-bottom { display: flex; justify-content: space-between; font-size: 12px; font-style: italic; padding: 4px 0; }
-.divider { border: 0; border-top: 3px solid var(--text-grey); margin: 0 -15px; }
+.divider { border: 0; border-top: 3px solid var(--text-grey); margin: 0; }
 
-.content-area { padding: 15px; }
-.input-wrapper { margin-bottom: 10px; }
-label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-.btn-save, .btn-action, .btn-red { background-color: var(--primary-red); color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-.btn-save { width: 100%; padding: 12px; font-size: 16px; }
-.menu-grid { display: flex; gap: 10px; }
-.btn-action { flex: 1; padding: 12px 0; font-size: 15px; }
+/* Full Screen Viewport Management */
+.full-screen-ui {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+    background: #000; display: flex; flex-direction: column; z-index: 1000;
+}
 
-/* Camera UI */
-#camera-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; }
-#video-feed { flex: 1; object-fit: cover; width: 100%; }
-.camera-controls { height: 80px; display: flex; justify-content: space-around; align-items: center; background: #fff; padding: 10px; }
-.btn-red { padding: 10px 40px; font-size: 16px; height: 50px; min-width: 140px; }
+.viewfinder, .preview-area { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+#video-feed, .fit-image { width: 100%; height: 100%; object-fit: contain; background: #000; }
 
-/* PIN Overlay */
-.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-.pin-box { background: white; padding: 25px; border-radius: 10px; text-align: center; width: 80%; }
+/* Fixed Bottom Controls */
+.camera-controls, .verification-bar, .save-bar {
+    background: #fff; padding: 15px; display: flex; gap: 10px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+}
 
-#final-image-preview { width: 100%; border-radius: 5px; margin-bottom: 15px; border: 2px solid #ddd; }
+.verification-bar { flex-direction: column; align-items: center; }
+
+/* Buttons */
+.btn-red-full, .btn-green-full { width: 100%; padding: 15px; border: none; border-radius: 6px; color: #fff; font-weight: bold; font-size: 16px; }
+.btn-red-full { background: var(--primary-red); }
+.btn-green-full { background: #28a745; }
+.btn-red-half { flex: 1; background: var(--primary-red); color: #fff; border: none; border-radius: 6px; padding: 15px; font-weight: bold; }
+
+.pin-display { font-weight: bold; margin-bottom: 10px; font-size: 18px; color: #333; }
+#display-pin { color: var(--primary-red); font-size: 22px; }
+#pin-input { width: 100%; text-align: center; font-size: 24px; padding: 10px; margin-bottom: 10px; border: 2px solid #ddd; }
