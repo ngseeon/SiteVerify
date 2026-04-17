@@ -35,13 +35,15 @@
             <div class="input-wrapper"><label>User Phone Number</label><input type="tel" id="userHandphone"></div>
             <div class="input-wrapper"><label>Recipient Email</label><input type="email" id="recipientEmail"></div>
             <div class="input-wrapper"><label>Recipient Phone Number</label><input type="tel" id="whatsappPhone"></div>
-            <button id="save-settings" class="btn-red-full">Save System Setting</button>
+            <div class="settings-actions">
+                <button id="save-settings" class="btn-red-standard">Save System Setting</button>
+            </div>
         </section>
 
         <section id="menu-screen">
             <div class="menu-grid">
-                <button id="nav-capture" class="btn-action">Capture</button>
-                <button id="nav-history" class="btn-action">History</button>
+                <button id="nav-capture" class="btn-red-standard">Capture</button>
+                <button id="nav-history" class="btn-red-standard">History</button>
             </div>
         </section>
 
@@ -50,37 +52,31 @@
                 <video id="video-feed" autoplay playsinline></video>
                 <canvas id="capture-canvas" style="display:none;"></canvas>
             </div>
-            <div class="camera-controls">
-                <button id="shutter-btn" class="btn-red-half">Capture</button>
-                <button id="camera-back" class="btn-red-half">Back</button>
+            <div class="fixed-bottom-bar">
+                <button id="shutter-btn" class="btn-red-standard">Capture</button>
+                <button id="camera-back" class="btn-red-standard">Back</button>
             </div>
         </section>
 
         <section id="pin-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area">
-                <img id="pin-preview" class="fit-image">
-            </div>
-            <div class="verification-bar">
+            <div class="preview-area"><img id="pin-preview" class="fit-image"></div>
+            <div class="fixed-bottom-bar flex-col">
                 <div class="pin-display">Enter Security PIN: <span id="display-pin">----</span></div>
-                <input type="number" id="pin-input" pattern="\d*" inputmode="numeric">
+                <input type="number" id="pin-input" class="line-input" pattern="\d*" inputmode="numeric">
             </div>
         </section>
 
         <section id="confirm-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area">
-                <img id="confirm-preview" class="fit-image">
-            </div>
-            <div class="action-bar">
-                <button id="verify-generate-btn" class="btn-red-full">Verify & Generate</button>
+            <div class="preview-area"><img id="confirm-preview" class="fit-image"></div>
+            <div class="fixed-bottom-bar">
+                <button id="verify-generate-btn" class="btn-red-standard">Verify & Generate</button>
             </div>
         </section>
 
         <section id="preview-screen" class="full-screen-ui" style="display:none;">
-            <div class="preview-area">
-                <img id="final-image-preview" class="fit-image">
-            </div>
-            <div class="save-bar">
-                <button id="save-to-device" class="btn-green-full">Save to Device</button>
+            <div class="preview-area"><img id="final-image-preview" class="fit-image"></div>
+            <div class="fixed-bottom-bar">
+                <button id="save-to-device" class="btn-green-standard">Save to Device</button>
             </div>
         </section>
     </main>
