@@ -1,88 +1,71 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let currentLat = 0, currentLon = 0, generatedPin = "", stream = null;
+    let stream = null;
     const canvas = document.createElement('canvas');
 
-    const showScreen = (id) => {
-        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = (id.includes('screen')) ? 'flex' : 'block';
-        if (id === 'settings-screen') document.getElementById(id).style.display = 'block';
-        if (id !== 'camera-screen') stopCamera();
-    };
-
-    // SYSTEM SETTINGS PERSISTENCE
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('save-settings').onclick = () => {
-        ['userName', 'userEmail', 'userHandphone', 'recipientEmail', 'whatsappPhone'].forEach(id => {
-            localStorage.setItem(id, document.getElementById(id).value);
-        });
-        showScreen('menu-screen');
-    };
-
-    // CAMERA LOGIC
-    async function startCamera(mode) {
-        if (stream) stopCamera();
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
-        document.getElementById('video-feed').srcObject = stream;
+    // 1. LIVE CLOCK: Forced 1-second interval
+    function startClock() {
+        const clockEl = document.getElementById('live-clock');
+        setInterval(() => {
+            const now = new Date();
+            clockEl.innerText = now.toLocaleString('en-GB', { 
+                day: '2-digit', month: 'long', year: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', 
+                hour12: false 
+            });
+        }, 1000);
     }
-    function stopCamera() { if (stream) stream.getTracks().forEach(t => t.stop()); }
+    startClock();
 
-    document.getElementById('nav-capture').onclick = () => { showScreen('camera-screen'); startCamera('environment'); };
-    document.getElementById('camera-back').onclick = () => showScreen('menu-screen');
+    // 2. LIVE GPS: Constant Monitor
+    navigator.geolocation.watchPosition(
+        (p) => {
+            const gps = document.getElementById('gps-status');
+            gps.innerText = "GPS : ON";
+            gps.classList.remove('gps-off');
+        },
+        () => {
+            const gps = document.getElementById('gps-status');
+            gps.innerText = "GPS : OFF";
+            gps.classList.add('gps-off');
+        },
+        { enableHighAccuracy: true }
+    );
 
-    document.getElementById('shutter-btn').onclick = async () => {
-        const video = document.getElementById('video-feed');
-        canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0);
+    // 3. CAPTURE BUTTON RE-WIRING
+    const shutterBtn = document.getElementById('shutter-btn');
+    if (shutterBtn) {
+        shutterBtn.addEventListener('click', () => {
+            const video = document.getElementById('video-feed');
+            if (video.readyState === 4) { // Ensure video is playing
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                // Set the preview and move to PIN screen
+                document.getElementById('pin-preview').src = canvas.toDataURL('image/jpeg');
+                document.getElementById('display-pin').innerText = Math.floor(1000 + Math.random() * 9000);
+                
+                document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+                document.getElementById('pin-screen').style.display = 'flex';
+                
+                if (stream) {
+                    stream.getTracks().forEach(t => t.stop());
+                }
+            }
+        });
+    }
 
-        stopCamera();
-        await startCamera('user'); // Selfie switch
-        setTimeout(() => {
-            ctx.drawImage(video, 20, canvas.height - 220, 300, 200); // Overlay selfie
-            generatedPin = Math.floor(1000 + Math.random() * 9000).toString(); // PIN Logic
-            document.getElementById('display-pin').innerText = generatedPin;
-            document.getElementById('pin-preview').src = canvas.toDataURL('image/jpeg');
-            showScreen('pin-screen');
-        }, 500);
+    // Standard Navigation
+    document.getElementById('nav-capture').onclick = async () => {
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+        document.getElementById('camera-screen').style.display = 'flex';
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        document.getElementById('video-feed').srcObject = stream;
     };
 
-    // PIN VERIFICATION
-    document.getElementById('pin-input').oninput = (e) => {
-        if (e.target.value === generatedPin) {
-            document.getElementById('confirm-preview').src = canvas.toDataURL('image/jpeg');
-            showScreen('confirm-screen');
-            e.target.value = "";
-        }
+    document.getElementById('camera-back').onclick = () => {
+        if (stream) stream.getTracks().forEach(t => t.stop());
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+        document.getElementById('menu-screen').style.display = 'block';
     };
-
-    document.getElementById('verify-gen-btn').onclick = async () => {
-        const qrText = `User: ${localStorage.getItem('userName')} | GPS: ${currentLat},${currentLon}`;
-        const qrCanvas = document.createElement('canvas');
-        await QRCode.toCanvas(qrCanvas, qrText, { width: 150 });
-        canvas.getContext('2d').drawImage(qrCanvas, canvas.width - 170, canvas.height - 170);
-        document.getElementById('final-preview').src = canvas.toDataURL('image/jpeg');
-        showScreen('save-screen');
-    };
-
-    document.getElementById('save-device').onclick = () => {
-        const link = document.createElement('a');
-        link.download = 'siteverify_logo.png';
-        link.href = document.getElementById('final-preview').src;
-        link.click();
-        showScreen('menu-screen');
-    };
-
-    // LIVE SERVICES
-    setInterval(() => {
-        document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB');
-    }, 1000);
-
-    navigator.geolocation.watchPosition(p => {
-        currentLat = p.coords.latitude; currentLon = p.coords.longitude;
-        document.getElementById('gps-status').className = 'gps-on';
-        document.getElementById('gps-status').innerText = 'GPS : ON';
-    }, () => {
-        document.getElementById('gps-status').className = 'gps-off';
-        document.getElementById('gps-status').innerText = 'GPS : OFF';
-    });
 });
