@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SiteVerify v17.9</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
     <header id="main-header">
         <div class="header-top">
-            <span id="gps-status">GPS : ON</span>
+            <span id="gps-display">GPS: SEARCHING...</span>
             <span id="settings-gear" style="cursor:pointer">⚙</span>
         </div>
         <div class="logo-box">
-            <img src="siteverify_logo.png" class="app-logo">
+            <img src="siteverify_logo.png" alt="Logo" class="app-logo">
         </div>
         <div class="header-bottom">
-            <span>🌐 Horizon Hills</span>
-            <span id="live-clock">--:--:--</span>
+            <span>🌐 <span id="location-text">Detecting...</span></span>
+            <span id="live-clock">00/00/0000, 00:00:00</span>
         </div>
         <hr class="header-line">
     </header>
@@ -28,20 +31,19 @@
     </section>
 
     <section id="settings-screen" class="app-screen" style="display:none">
-        <div class="settings-padding">
+        <div class="settings-container">
             <h2>System Settings</h2>
-            <div class="input-field">
-                <label>User Name</label>
-                <input type="text" value="NG SEE ON">
-            </div>
-            <button id="save-settings" class="btn-red">Save System Setting</button>
+            <div class="field-group"><label>User Name</label><input type="text" id="user-name" value="NG SEE ON"></div>
+            <div class="field-group"><label>User Email</label><input type="email" id="user-email" value="ngseeon@gmail.com"></div>
+            <div class="field-group"><label>User Phone Number</label><input type="text" id="user-phone" value="+6012738393"></div>
+            <div class="field-group"><label>Recipient Email</label><input type="email" id="reci-email" value="seeon.ng@gmail.com"></div>
+            <div class="field-group"><label>Recipient Phone Number</label><input type="text" id="reci-phone" value="+60175783133"></div>
+            <button id="save-settings" class="btn-red-wide">Save System Setting</button>
         </div>
     </section>
 
     <section id="camera-screen" class="app-screen" style="display:none; background:#000;">
-        <div class="camera-preview">
-            <video id="video-feed" autoplay playsinline></video>
-        </div>
+        <video id="video-feed" autoplay playsinline></video>
         <div class="action-bar">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
