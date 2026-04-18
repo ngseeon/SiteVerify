@@ -1,43 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const screens = { menu: 'menu-screen', settings: 'settings-screen', camera: 'camera-screen' };
+    const header = document.getElementById('app-header');
     const video = document.getElementById('video-feed');
     let stream = null;
-
-    function show(id) {
-        Object.values(screens).forEach(s => document.getElementById(s).style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-    }
 
     // 1. LIVE CLOCK
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB');
     }, 1000);
 
-    // 2. LIVE GPS
-    if ("geolocation" in navigator) {
-        navigator.geolocation.watchPosition(pos => {
-            document.getElementById('gps-display').innerText = `GPS: ON (${pos.coords.latitude.toFixed(4)})`;
-            document.getElementById('location-text').innerText = "Active Tracking";
-        }, err => {
-            document.getElementById('gps-display').innerText = "GPS: ERROR";
-        }, { enableHighAccuracy: true });
+    function switchScreen(screenId, showHeader) {
+        document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
+        document.getElementById(screenId).style.display = 'block';
+        header.style.display = showHeader ? 'block' : 'none';
     }
 
-    // 3. CAMERA ACTIVATION
+    // 2. CAMERA LOGIC
     document.getElementById('nav-capture').onclick = async () => {
-        show(screens.camera);
+        switchScreen('camera-screen', false); // Hide header for camera
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
-        } catch (e) { alert("Camera Permission Denied"); show(screens.menu); }
+        } catch (e) { alert("Camera Error"); switchScreen('menu-screen', true); }
+    };
+
+    document.getElementById('shutter').onclick = () => {
+        alert("Capture function triggered!"); // Logic for Step 1 of workflow
     };
 
     document.getElementById('cam-back').onclick = () => {
         if (stream) stream.getTracks().forEach(t => t.stop());
-        show(screens.menu);
+        switchScreen('menu-screen', true);
     };
 
-    // 4. NAVIGATION
-    document.getElementById('settings-gear').onclick = () => show(screens.settings);
-    document.getElementById('save-settings').onclick = () => { alert("Settings Saved!"); show(screens.menu); };
+    // 3. SETTINGS NAVIGATION
+    document.getElementById('settings-gear').onclick = () => switchScreen('settings-screen', true);
+    document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
 });
