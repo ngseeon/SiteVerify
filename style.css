@@ -1,29 +1,28 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
+body { font-family: Arial, sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #fff; }
 
+/* HEADER */
 #main-header {
     background: #f2f2f2; height: 135px; width: 100%;
     position: fixed; top: 0; z-index: 1000; padding: 10px 15px;
 }
-
 .logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; }
 .app-logo { max-width: 180px; height: 100%; object-fit: contain; }
-.header-top, .header-bottom { display: flex; justify-content: space-between; font-size: 14px; }
+.header-top, .header-bottom { display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; }
 .header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
 
 /* SCREENS */
-.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; }
-.settings-padding { padding: 20px; }
-.input-field { margin-bottom: 15px; }
-.input-field label { display: block; font-weight: bold; margin-bottom: 5px; }
-.input-field input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; overflow-y: auto; background: #fff; }
+
+/* SETTINGS COLUMN FIX */
+.settings-container { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+.field-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.field-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+
+/* CAMERA FEED */
+#video-feed { width: 100%; height: 100%; object-fit: cover; background: #000; }
 
 /* BUTTONS */
-.action-bar {
-    position: fixed; bottom: 40px; width: 100%;
-    display: flex; padding: 0 15px; gap: 10px;
-}
-.btn-red {
-    flex: 1; height: 60px; background: #ff0000; color: #fff;
-    border: none; border-radius: 10px; font-weight: bold; font-size: 18px;
-}
+.action-bar { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 10px; z-index: 2000; }
+.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; }
+.btn-red-wide { width: 100%; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 18px; margin-top: 10px; }
