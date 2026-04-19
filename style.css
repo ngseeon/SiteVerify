@@ -1,8 +1,7 @@
-/* GLOBAL RESET */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #fff; }
 
-/* LOGO & HEADER */
+/* LOGO & HEADER FIX */
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px 15px; border-bottom: 1px solid #ddd; }
 .logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; overflow: hidden; }
 .app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
