@@ -1,38 +1,60 @@
-/* Updated Button Styling for Phase 2 */
-.action-bar {
-    position: fixed;
-    bottom: 30px;
+/* 1. LOGO RE-CAGING */
+.logo-box {
     width: 100%;
+    height: 60px; /* Fixed height to prevent logo explosion */
     display: flex;
     justify-content: center;
-    padding: 0 20px;
-    gap: 15px;
-    z-index: 2000;
+    align-items: center;
+    margin: 5px 0;
+    overflow: hidden; /* Ensures nothing spills out */
 }
 
-.btn-red {
-    flex: 1;
-    height: 55px;
-    background: #ff0000;
-    color: #ffffff;
-    border: none;
-    /* This creates the half-circle shape on the ends */
-    border-radius: 50px; 
+.app-logo {
+    max-width: 180px; /* Restricts width */
+    max-height: 100%; /* Restricts height to container */
+    object-fit: contain; /* Maintains aspect ratio without stretching */
+}
+
+/* 2. SYSTEM SETTINGS LAYOUT RESTORATION */
+.settings-container {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Spacing between fields */
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column; /* Forces Label above Input */
+    width: 100%;
+}
+
+.field-group label {
+    font-size: 14px;
     font-weight: bold;
-    font-size: 18px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    cursor: pointer;
+    margin-bottom: 4px;
+    color: #333;
 }
 
-/* For the wide settings button */
+.field-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    background-color: #fff;
+}
+
+/* 3. PILL BUTTONS (STAYING CONSISTENT) */
 .btn-red-wide {
     width: 100%;
-    height: 55px;
+    height: 60px;
     background: #ff0000;
     color: #ffffff;
     border: none;
-    border-radius: 50px;
+    border-radius: 50px; /* Half-circle ends */
     font-weight: bold;
     font-size: 18px;
     margin-top: 20px;
+    cursor: pointer;
 }
