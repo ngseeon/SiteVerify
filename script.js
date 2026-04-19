@@ -1,85 +1,37 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const header = document.getElementById('app-header');
-    const gpsStatusText = document.getElementById('gps-status');
-    const video = document.getElementById('video-feed');
-    let stream = null;
+document.getElementById('shutter').onclick = async () => {
+    // 1. Capture Back Camera Frame
+    const backCanvas = document.createElement('canvas');
+    backCanvas.width = video.videoWidth;
+    backCanvas.height = video.videoHeight;
+    backCanvas.getContext('2d').drawImage(video, 0, 0);
+    const mainImageData = backCanvas.toDataURL('image/jpeg');
 
-    // 1. DYNAMIC GPS CHECK
-    async function updateGpsStatus() {
-        if (!navigator.geolocation) {
-            gpsStatusText.innerText = "GPS: UNSUPPORTED";
-            return;
-        }
+    // 2. Stop Back Camera and Instant Flip to Front
+    stream.getTracks().forEach(t => t.stop());
+    
+    try {
+        const frontStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: "user" } 
+        });
+        video.srcObject = frontStream;
 
-        try {
-            const result = await navigator.permissions.query({ name: 'geolocation' });
+        // Small delay to let front camera stabilize (<0.5s)
+        setTimeout(() => {
+            const frontCanvas = document.createElement('canvas');
+            frontCanvas.width = video.videoWidth;
+            frontCanvas.height = video.videoHeight;
+            frontCanvas.getContext('2d').drawImage(video, 0, 0);
+            const selfieData = frontCanvas.toDataURL('image/jpeg');
+
+            // 3. Trigger PIN Logic (Next Update)
+            console.log("Dual Snaps Complete");
+            alert("Step 1 & 2 Complete: Photos Captured. Moving to PIN Verification.");
             
-            const handleStatus = (status) => {
-                if (status === 'granted') {
-                    gpsStatusText.innerText = "GPS: ON";
-                    gpsStatusText.style.color = "black";
-                } else if (status === 'prompt') {
-                    gpsStatusText.innerText = "GPS: PENDING";
-                } else {
-                    gpsStatusText.innerText = "GPS: OFF";
-                    gpsStatusText.style.color = "red";
-                }
-            };
+            // For now, return to back camera for live view or proceed to PIN
+            frontStream.getTracks().forEach(t => t.stop());
+        }, 400);
 
-            handleStatus(result.state);
-            result.onchange = () => handleStatus(result.state);
-
-        } catch (e) {
-            // Fallback if Permissions API isn't fully supported
-            navigator.geolocation.getCurrentPosition(
-                () => { gpsStatusText.innerText = "GPS: ON"; },
-                () => { gpsStatusText.innerText = "GPS: OFF"; }
-            );
-        }
+    } catch (e) {
+        alert("Selfie Capture Failed: " + e.message);
     }
-
-    // Run GPS check on load
-    updateGpsStatus();
-
-    // 2. LIVE CLOCK
-    setInterval(() => {
-        document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB');
-    }, 1000);
-
-    // 3. NAVIGATION LOGIC
-    function switchScreen(screenId, showHeader) {
-        document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
-        document.getElementById(screenId).style.display = 'block';
-        header.style.display = showHeader ? 'block' : 'none';
-        
-        // Re-check GPS whenever we go back to a screen with a header
-        if (showHeader) updateGpsStatus();
-    }
-
-    document.getElementById('nav-capture').onclick = async () => {
-        switchScreen('camera-screen', false); 
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-            video.srcObject = stream;
-        } catch (e) { 
-            alert("Camera Error"); 
-            switchScreen('menu-screen', true); 
-        }
-    };
-
-    document.getElementById('shutter').onclick = () => {
-        // Step 1: Capture & Stamp Logic will go here
-        alert("Capture function triggered!"); 
-    };
-
-    document.getElementById('cam-back').onclick = () => {
-        if (stream) {
-            stream.getTracks().forEach(t => t.stop());
-            stream = null;
-        }
-        switchScreen('menu-screen', true); // Properly restores header
-    };
-
-    document.getElementById('settings-gear').onclick = () => switchScreen('settings-screen', true);
-    document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
-});
+};
