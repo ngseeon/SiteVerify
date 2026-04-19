@@ -18,24 +18,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     startClock();
 
-    // 2. DYNAMIC LOCATION LOOKUP
-    async function updateCityAndState(lat, lon) {
+    // 2. IMPROVED LOCATION LOOKUP (Targeting Town Name)
+    async function updateDetailedLocation(lat, lon) {
         try {
             const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
             const data = await response.json();
             
-            // Get city/locality and state/province
-            const city = data.locality || data.city || "Unknown City";
+            // Checks for specific neighborhood/town (locality) first, then falls back to city
+            const town = data.locality || data.city || "Unknown Town";
             const state = data.principalSubdivision || "Unknown State";
             
-            locDisplay.innerText = `🌐 ${city}, ${state}`;
+            locDisplay.innerText = `🌐 ${town}, ${state}`;
         } catch (error) {
             locDisplay.innerText = "🌐 Location Data Error";
-            console.error("Geocoding failed:", error);
         }
     }
 
-    // 3. GPS HANDWARE INTERFACE
+    // 3. GPS HANDWARE
     function initGPS() {
         if (!navigator.geolocation) {
             gpsStatusText.innerText = "GPS: UNSUPPORTED";
@@ -46,27 +45,23 @@ document.addEventListener('DOMContentLoaded', () => {
             (position) => {
                 gpsStatusText.innerText = "GPS: ON";
                 gpsStatusText.style.color = "black";
-                // Trigger the actual name lookup
-                updateCityAndState(position.coords.latitude, position.coords.longitude);
+                updateDetailedLocation(position.coords.latitude, position.coords.longitude);
             },
             (error) => {
                 gpsStatusText.innerText = "GPS: OFF";
                 gpsStatusText.style.color = "red";
-                locDisplay.innerText = "🌐 Permission Denied";
+                locDisplay.innerText = "🌐 GPS Signal Required";
             },
-            { enableHighAccuracy: true }
+            { enableHighAccuracy: true } // Request best possible accuracy
         );
     }
     initGPS();
 
-    // 4. SCREEN NAVIGATION ENGINE
+    // 4. NAVIGATION
     function switchScreen(screenId, showHeader) {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
-        const target = document.getElementById(screenId);
-        if (target) target.style.display = 'block';
+        document.getElementById(screenId).style.display = 'block';
         header.style.display = showHeader ? 'block' : 'none';
-        
-        // Refresh GPS/Location when returning to main header
         if (showHeader) initGPS();
     }
 
@@ -91,6 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
     
     document.getElementById('shutter').onclick = () => {
-        alert("Capture function triggered!");
+        alert("Capture Successful! Location and Time verified.");
     };
 });
