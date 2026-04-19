@@ -1,25 +1,28 @@
-/* ALL PREVIOUS STYLES REMAIN + PHASE 2 ADDITIONS */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #fff; }
 
+/* HEADER */
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px 15px; border-bottom: 1px solid #ddd; }
 .logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; overflow: hidden; }
 .app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
 .header-top, .header-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; font-family: monospace; }
 .header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
 
-.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; }
+/* SCREEN ISOLATION: Sections only show when active */
+.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; display: none; }
+#menu-screen { display: block; } /* Default screen */
 .full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; }
 #video-feed { width: 100%; height: 100%; object-fit: cover; }
 
-/* PHASE 2 OVERLAYS */
-.overlay-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 3000; }
-.pin-box { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 90%; }
-.pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; margin: 15px 0; border: 1px solid #ccc; }
-
-.action-bar, .action-bar-overlay { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 15px; z-index: 2000; left:0; }
-.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; }
+/* BUTTONS */
+.action-bar-main, .action-bar-camera, .action-bar-overlay { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 15px; z-index: 2000; left:0; }
+.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
 .btn-red-wide { width: 100%; height: 60px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; cursor: pointer; }
+
+/* OVERLAYS */
+.overlay-screen { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 3000; }
+.pin-box { background: white; padding: 25px; border-radius: 15px; text-align: center; width: 90%; }
+.pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; margin: 15px 0; border: 1px solid #ccc; border-radius: 8px; }
 
 .settings-container { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
 .field-group label { font-size: 13px; font-weight: bold; display: block; margin-bottom: 4px; }
