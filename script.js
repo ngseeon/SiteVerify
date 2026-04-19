@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // BUTTON CLICKS
     document.getElementById('nav-capture').onclick = async () => {
-        switchScreen('camera-screen', false); // Goes Full Screen
+        switchScreen('camera-screen', false); // Clean View: Hides Header
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
@@ -51,11 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('cam-back').onclick = () => {
         if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-        switchScreen('menu-screen', true);
+        switchScreen('menu-screen', true); // Returns Header
     };
 
     document.getElementById('settings-gear').onclick = () => switchScreen('settings-screen', true);
     document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
     
-    document.getElementById('shutter').onclick = () => alert("Capture Triggered! Phase 2 Ready.");
+    document.getElementById('shutter').onclick = () => alert("Capture Triggered! Ready for Phase 2 logic.");
 });
