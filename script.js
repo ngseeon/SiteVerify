@@ -18,23 +18,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     startClock();
 
-    // 2. IMPROVED LOCATION LOOKUP (Targeting Town Name)
+    // 2. REFINED LOCATION LOGIC (Targeting specific town name like "Gelang Patah")
     async function updateDetailedLocation(lat, lon) {
         try {
             const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
             const data = await response.json();
             
-            // Checks for specific neighborhood/town (locality) first, then falls back to city
-            const town = data.locality || data.city || "Unknown Town";
-            const state = data.principalSubdivision || "Unknown State";
+            // Refined Logic: Search localityInfo for the town/sub-district level specifically
+            let town = "";
+            if (data.localityInfo && data.localityInfo.informative) {
+                // Find the entry that represents a town or sub-district level
+                const townData = data.localityInfo.informative.find(info => 
+                    info.order >= 4 && (info.name !== data.principalSubdivision)
+                );
+                town = townData ? townData.name : (data.locality || data.city);
+            } else {
+                town = data.locality || data.city;
+            }
             
+            const state = data.principalSubdivision || "Johor";
             locDisplay.innerText = `🌐 ${town}, ${state}`;
         } catch (error) {
             locDisplay.innerText = "🌐 Location Data Error";
         }
     }
 
-    // 3. GPS HANDWARE
+    // 3. GPS INITIALIZATION
     function initGPS() {
         if (!navigator.geolocation) {
             gpsStatusText.innerText = "GPS: UNSUPPORTED";
@@ -52,12 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 gpsStatusText.style.color = "red";
                 locDisplay.innerText = "🌐 GPS Signal Required";
             },
-            { enableHighAccuracy: true } // Request best possible accuracy
+            { enableHighAccuracy: true, timeout: 10000 }
         );
     }
     initGPS();
 
-    // 4. NAVIGATION
+    // 4. NAVIGATION ENGINE
     function switchScreen(screenId, showHeader) {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(screenId).style.display = 'block';
@@ -65,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (showHeader) initGPS();
     }
 
-    // BUTTON ACTIONS
+    // BUTTON INTERACTIONS
     document.getElementById('nav-capture').onclick = async () => {
         switchScreen('camera-screen', false); 
         try {
@@ -86,6 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
     
     document.getElementById('shutter').onclick = () => {
-        alert("Capture Successful! Location and Time verified.");
+        alert("Capture Successful!");
     };
 });
