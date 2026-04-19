@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v18.0 - Phase 2</title>
+    <title>SiteVerify v18.1 - Phase 2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -12,7 +12,7 @@
     <header id="app-header">
         <div class="header-top">
             <span id="gps-status">GPS: PENDING</span>
-            <span id="settings-gear" style="cursor:pointer">⚙</span>
+            <span id="settings-gear">⚙</span>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" alt="Logo" class="app-logo">
@@ -25,8 +25,8 @@
     </header>
 
     <section id="menu-screen" class="app-screen">
-        <div class="action-bar">
-            <button id="nav-capture" class="btn-red">Capture</button>
+        <div class="action-bar-main">
+            <button id="nav-capture" class="btn-red">SiteVerify</button>
             <button id="nav-history" class="btn-red">History</button>
         </div>
     </section>
@@ -51,7 +51,7 @@
             <div class="pin-box">
                 <h3>Verify Location PIN</h3>
                 <p>Enter: <span id="generated-pin" style="color:red; font-weight:bold;">0000</span></p>
-                <input type="number" id="pin-input" placeholder="Enter 4-digit PIN">
+                <input type="number" id="pin-input" placeholder="4-digit PIN">
                 <button id="verify-pin-btn" class="btn-red-wide">Verify & Lock Data</button>
             </div>
         </div>
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <div class="action-bar" id="camera-controls">
+        <div class="action-bar-camera" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
         </div>
