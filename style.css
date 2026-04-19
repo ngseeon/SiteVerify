@@ -1,25 +1,21 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #fff; }
 
-/* HEADER & LOGO */
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px 15px; border-bottom: 1px solid #ddd; }
 .logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; overflow: hidden; }
 .app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
 .header-top, .header-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; font-family: monospace; }
 .header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
 
-/* NAVIGATION SCREENS */
 .app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; }
 .full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; }
 #video-feed { width: 100%; height: 100%; object-fit: cover; }
 
-/* SYSTEM SETTINGS */
 .settings-container { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
 .field-group { display: flex; flex-direction: column; width: 100%; }
 .field-group label { font-size: 13px; font-weight: bold; margin-bottom: 4px; color: #333; }
 .field-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
 
-/* ACTION BUTTONS */
 .action-bar { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 15px; z-index: 2000; }
 .btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.3); }
 .btn-red-wide { width: 100%; height: 60px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; margin-top: 10px; cursor: pointer; }
