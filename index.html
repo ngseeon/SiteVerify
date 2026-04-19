@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v17.9</title>
+    <title>SiteVerify v18.0 - Phase 2</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -37,19 +38,44 @@
             <div class="field-group"><label>User Email</label><input type="email" id="set-useremail" value="ngseeon@gmail.com"></div>
             <div class="field-group"><label>User Phone Number</label><input type="text" id="set-userphone" value="+6012-7383923"></div>
             <div class="field-group"><label>Recipient Email</label><input type="email" id="set-recemail" value="seeon.ng@gmail.com"></div>
-            <div class="field-group"><label>Recipient Phone Number</label><input type="text" id="set-recphone" value="+60175783133"></div>
+            <div class="field-group"><label>WhatsApp Phone</label><input type="text" id="set-recphone" value="+60175783133"></div>
             <button id="save-settings" class="btn-red-wide">Save System Setting</button>
         </div>
     </section>
 
     <section id="camera-screen" class="app-screen full-view" style="display:none">
         <video id="video-feed" autoplay playsinline></video>
-        <div class="action-bar">
+        <canvas id="capture-canvas" style="display:none;"></canvas>
+        
+        <div id="pin-overlay" class="overlay-screen" style="display:none">
+            <div class="pin-box">
+                <h3>Verify Location PIN</h3>
+                <p>Enter: <span id="generated-pin" style="color:red; font-weight:bold;">0000</span></p>
+                <input type="number" id="pin-input" placeholder="Enter 4-digit PIN">
+                <button id="verify-pin-btn" class="btn-red-wide">Verify & Lock Data</button>
+            </div>
+        </div>
+
+        <div id="review-overlay" class="overlay-screen" style="display:none">
+            <img id="final-preview" style="width:100%; border: 2px solid white;">
+            <div id="save-controls" class="action-bar-overlay">
+                <button id="save-to-device" class="btn-red">Save to Device</button>
+                <button id="discard-btn" class="btn-red">Discard</button>
+            </div>
+            <div id="share-controls" class="action-bar-overlay" style="display:none">
+                <button id="share-whatsapp" class="btn-red">WhatsApp</button>
+                <button id="share-gmail" class="btn-red">Gmail App</button>
+                <button id="final-back" class="btn-red">Back</button>
+            </div>
+        </div>
+
+        <div class="action-bar" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
         </div>
     </section>
 
+    <div id="qrcode" style="display:none;"></div>
     <script src="script.js"></script>
 </body>
 </html>
