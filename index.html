@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v18.1 - Phase 2</title>
+    <title>SiteVerify v19.5 - Capture Engine</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -47,17 +47,17 @@
         <video id="video-feed" autoplay playsinline></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
         
-        <div id="pin-overlay" class="overlay-screen" style="display:none">
-            <div class="pin-box">
-                <h3>Verify Location PIN</h3>
-                <p>Enter: <span id="generated-pin" style="color:red; font-weight:bold;">0000</span></p>
+        <div id="pin-overlay" class="overlay-glass" style="display:none">
+            <img id="pin-preview-bg" class="bg-blur-preview">
+            <div class="pin-container">
+                <p class="pin-label">Enter Security PIN <span id="generated-pin" style="color:#ff0000; font-weight:bold;">0000</span></p>
                 <input type="number" id="pin-input" placeholder="4-digit PIN">
                 <button id="verify-pin-btn" class="btn-red-wide">Verify & Lock Data</button>
             </div>
         </div>
 
         <div id="review-overlay" class="overlay-screen" style="display:none">
-            <img id="final-preview" style="width:100%; border: 2px solid white;">
+            <img id="final-preview" class="doc-preview">
             <div id="save-controls" class="action-bar-overlay">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
