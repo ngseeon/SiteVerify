@@ -18,56 +18,66 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     startClock();
 
-    // 2. REVERSE GEOCODING (Dynamic City Name)
-    async function getCityName(lat, lon) {
+    // 2. DYNAMIC LOCATION LOOKUP
+    async function updateCityAndState(lat, lon) {
         try {
             const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
             const data = await response.json();
+            
+            // Get city/locality and state/province
             const city = data.locality || data.city || "Unknown City";
             const state = data.principalSubdivision || "Unknown State";
+            
             locDisplay.innerText = `🌐 ${city}, ${state}`;
-        } catch (e) {
-            locDisplay.innerText = "🌐 Location Unavailable";
+        } catch (error) {
+            locDisplay.innerText = "🌐 Location Data Error";
+            console.error("Geocoding failed:", error);
         }
     }
 
-    // 3. GPS HARDWARE CHECK
-    async function updateGpsStatus() {
+    // 3. GPS HANDWARE INTERFACE
+    function initGPS() {
         if (!navigator.geolocation) {
             gpsStatusText.innerText = "GPS: UNSUPPORTED";
             return;
         }
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 gpsStatusText.innerText = "GPS: ON";
                 gpsStatusText.style.color = "black";
-                getCityName(position.coords.latitude, position.coords.longitude);
+                // Trigger the actual name lookup
+                updateCityAndState(position.coords.latitude, position.coords.longitude);
             },
-            () => {
+            (error) => {
                 gpsStatusText.innerText = "GPS: OFF";
                 gpsStatusText.style.color = "red";
-                locDisplay.innerText = "🌐 GPS Permission Required";
-            }
+                locDisplay.innerText = "🌐 Permission Denied";
+            },
+            { enableHighAccuracy: true }
         );
     }
-    updateGpsStatus();
+    initGPS();
 
-    // 4. NAVIGATION
+    // 4. SCREEN NAVIGATION ENGINE
     function switchScreen(screenId, showHeader) {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
-        document.getElementById(screenId).style.display = 'block';
+        const target = document.getElementById(screenId);
+        if (target) target.style.display = 'block';
         header.style.display = showHeader ? 'block' : 'none';
-        if (showHeader) updateGpsStatus();
+        
+        // Refresh GPS/Location when returning to main header
+        if (showHeader) initGPS();
     }
 
-    // BUTTON INTERACTIONS
+    // BUTTON ACTIONS
     document.getElementById('nav-capture').onclick = async () => {
-        switchScreen('camera-screen', false); // Goes Full View
+        switchScreen('camera-screen', false); 
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
             video.srcObject = stream;
         } catch (e) {
-            alert("Camera Error: " + e.message);
+            alert("Camera Access Error");
             switchScreen('menu-screen', true);
         }
     };
@@ -81,6 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings').onclick = () => switchScreen('menu-screen', true);
     
     document.getElementById('shutter').onclick = () => {
-        alert("Capture Triggered! Proceeding to Step 2: Dual-Lens Snaps.");
+        alert("Capture function triggered!");
     };
 });
