@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('app-header');
     
     let stream = null;
-    let sitePhoto = null; 
+    let rearPhoto = null; 
     let currentCoords = { lat: 0, lon: 0 };
     let capturedPIN = "";
     let currentTown = "Gelang Patah";
 
-    // 1. DATA PERSISTENCE & LOAD
+    // 1. DATA LOAD/SAVE
     const fields = ['username', 'useremail', 'userphone', 'recemail', 'recphone'];
     const loadSettings = () => {
         fields.forEach(f => {
@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('save-settings').onclick = () => {
         fields.forEach(f => localStorage.setItem(`sv_${f}`, document.getElementById(`set-${f}`).value));
-        alert("Settings Saved Successfully");
         showScreen('menu-screen');
     };
 
@@ -31,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
     }, 1000);
 
-    // 3. GPS & TOWN OVERRIDE
+    // 3. GPS & ACCURACY FIX
     function initGPS() {
         navigator.geolocation.watchPosition(async (p) => {
             currentCoords = { lat: p.coords.latitude, lon: p.coords.longitude };
@@ -39,8 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentCoords.lat}&lon=${currentCoords.lon}`);
                 const data = await res.json();
-                let detected = data.address.town || data.address.village || data.address.suburb || data.address.city;
-                // Force "Gelang Patah" override
+                const addr = data.address;
+                // Granular check for Horizon Hills vs Pulai
+                let detected = addr.neighbourhood || addr.suburb || addr.residential || addr.town || addr.city;
                 currentTown = (detected === "Iskandar Puteri") ? "Gelang Patah" : (detected || "Gelang Patah");
                 locDisplay.innerText = `🌐 ${currentTown}`;
             } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
@@ -48,80 +48,82 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     initGPS();
 
-    // 4. SCREEN NAVIGATION
+    // 4. NAVIGATION ENGINE
     function showScreen(id) {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         header.style.display = (id === 'camera-screen') ? 'none' : 'block';
     }
 
-    // 5. CAMERA ENGINE (Rear -> Front Sequence)
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
-            video.srcObject = stream;
-        } catch (e) { alert("Camera Error: " + e); }
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
+        video.srcObject = stream;
     }
 
     document.getElementById('nav-capture').onclick = () => { showScreen('camera-screen'); startCamera("environment"); };
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+
     document.getElementById('cam-back').onclick = () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
-        if (mode === 'user') { startCamera("environment"); } else { location.reload(); }
+        if (mode === 'user') { startCamera("environment"); } 
+        else { location.reload(); } // Stage 1 Back -> Menu
     };
 
-    // 6. DUAL CAPTURE & PIN TRIGGER
+    // 5. STAGE SEQUENCING
     document.getElementById('shutter').onclick = () => {
-        const ctx = canvas.getContext('2d');
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
+        const ctx = canvas.getContext('2d');
+        canvas.width = 1280; canvas.height = 720;
 
         if (mode !== 'user') {
-            canvas.width = 1280; canvas.height = 720;
             ctx.drawImage(video, 0, 0, 1280, 720);
-            sitePhoto = ctx.getImageData(0, 0, 1280, 720);
-            startCamera("user"); // Move to Selfie Stage
+            rearPhoto = ctx.getImageData(0, 0, 1280, 720);
+            startCamera("user");
         } else {
-            // PIN Calculation (Sum of GPS Decimals)
-            const dStr = currentCoords.lat.toString().split('.')[1] + currentCoords.lon.toString().split('.')[1];
-            capturedPIN = dStr.split('').reduce((a,b)=>parseInt(a)+parseInt(b), 0).toString().padStart(4,'0').substring(0,4);
+            // Freeze Frame and Stop Camera for Static Background
+            ctx.putImageData(rearPhoto, 0, 0); 
+            ctx.lineWidth = 6; ctx.strokeStyle = "white";
+            ctx.strokeRect(40, 460, 240, 240);
+            ctx.drawImage(video, 40, 460, 240, 240);
             
+            stream.getTracks().forEach(t => t.stop()); // Stop Live Feed
+            
+            const unix = Math.floor(Date.now() / 1000);
+            capturedPIN = unix.toString().slice(-4);
             document.getElementById('generated-pin').innerText = capturedPIN;
             document.getElementById('pin-overlay').style.display = 'flex';
             document.getElementById('camera-controls').style.display = 'none';
         }
     };
 
-    // 7. VERIFY & RENDER (No Watermarks, integrated QR only)
+    // 6. VERIFY & DATA LOCK
     document.getElementById('verify-pin-btn').onclick = () => {
         if (document.getElementById('pin-input').value === capturedPIN) {
             const ctx = canvas.getContext('2d');
-            ctx.putImageData(sitePhoto, 0, 0); // Restore site photo
-
-            // Selfie (Bottom Left)
-            ctx.lineWidth = 8; ctx.strokeStyle = "white";
-            ctx.strokeRect(40, 460, 240, 240);
-            ctx.drawImage(video, 40, 460, 240, 240);
-
-            // QR Generation
-            const qrContent = `User: ${localStorage.getItem('sv_username')}\nPhone: ${localStorage.getItem('sv_userphone')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nTime: ${document.getElementById('live-clock').innerText}`;
+            const unix = Math.floor(Date.now() / 1000);
+            const timeStr = document.getElementById('live-clock').innerText;
+            
+            // Build QR Content (7 Points)
+            const meta = `SiteVerify\nDate/Time: ${timeStr}\nUser: ${localStorage.getItem('sv_username')}\nPhone: ${localStorage.getItem('sv_userphone')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nUnix: ${unix}`;
+            
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
-            new QRCode(qrTemp, { text: qrContent, width: 220, height: 220 });
+            new QRCode(qrTemp, { text: meta, width: 220, height: 220 });
 
             setTimeout(() => {
-                ctx.drawImage(qrTemp.querySelector('img'), 1020, 460, 220, 220); // QR (Bottom Right)
-                stream.getTracks().forEach(t => t.stop()); // Stop camera
+                ctx.drawImage(qrTemp.querySelector('img'), 1020, 460, 220, 220);
                 document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
                 document.getElementById('pin-overlay').style.display = 'none';
                 document.getElementById('review-overlay').style.display = 'block';
-            }, 600);
-        } else { alert("Incorrect Security PIN"); }
+            }, 500);
+        } else { alert("Wrong PIN"); }
     };
 
-    // 8. SAVE & SHARE
+    // 7. SHARING LOGIC
     document.getElementById('save-to-device').onclick = () => {
         const link = document.createElement('a');
-        link.download = `Verified_${Date.now()}.jpg`;
+        link.download = `SiteVerify_${Math.floor(Date.now()/1000)}.jpg`;
         link.href = document.getElementById('final-document').src;
         link.click();
         document.getElementById('save-controls').style.display = 'none';
@@ -129,11 +131,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('share-whatsapp').onclick = () => {
-        const ph = localStorage.getItem('sv_recphone').replace(/\+/g,'');
-        window.open(`https://wa.me/${ph}?text=Verification%20Locked%20at%20${currentTown}`);
+        const msg = encodeURIComponent(`SiteVerify\nTime: ${document.getElementById('live-clock').innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nUnix: ${Math.floor(Date.now()/1000)}`);
+        window.open(`https://wa.me/${localStorage.getItem('sv_recphone').replace(/\+/g,'')}?text=${msg}`);
     };
 
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('share-gmail').onclick = () => {
+        const body = encodeURIComponent(`SiteVerify Verification Report\n\nUser: ${localStorage.getItem('sv_username')}\nPhone: ${localStorage.getItem('sv_userphone')}\nLocation: ${currentTown}\nGPS: ${currentCoords.lat}, ${currentCoords.lon}\nTime: ${document.getElementById('live-clock').innerText}\nUnix Timestamp: ${Math.floor(Date.now()/1000)}`);
+        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify Data Lock&body=${body}`;
+    };
+
     document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('final-back').onclick = () => location.reload();
 });
