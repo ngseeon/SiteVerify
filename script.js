@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('capture-canvas');
     const locDisplay = document.getElementById('location-display');
+    const pinDisplay = document.getElementById('pin-display');
     
     let stream = null;
     let rearPhotoData = null; 
@@ -10,12 +11,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let locationPIN = "";
     let activeJobID = "";
 
-    // PIN LOGIC: Sum of Lat decimals + Lon decimals (Not fixed to 4 digits)
+    // PIN LOGIC: Sum of decimals from Lat and Lon
     function calculatePIN(lat, lon) {
-        const latDec = parseInt(Math.abs(lat).toString().split('.')[1] || "0");
-        const lonDec = parseInt(Math.abs(lon).toString().split('.')[1] || "0");
-        return (latDec + lonDec).toString();
+        const latStr = lat.toString().split('.')[1] || "0";
+        const lonStr = lon.toString().split('.')[1] || "0";
+        return (parseInt(latStr) + parseInt(lonStr)).toString();
     }
+
+    const showScreen = (id) => {
+        document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
+        const target = document.getElementById(id);
+        if (target) target.style.display = 'block';
+        document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
+    };
+
+    // BUTTON LISTENERS (Moved to top for stability)
+    document.getElementById('nav-capture').onclick = () => showScreen('input-screen');
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
+    document.getElementById('back-settings').onclick = () => showScreen('menu-screen');
+    document.getElementById('cam-back').onclick = () => location.reload();
 
     const loadSettings = () => {
         ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
@@ -37,6 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 1000);
 
     function initGPS() {
+        if (!navigator.geolocation) {
+            document.getElementById('gps-status').innerText = "GPS: NOT SUPPORTED";
+            return;
+        }
+        
         navigator.geolocation.watchPosition(async (p) => {
             currentCoords = { lat: p.coords.latitude, lon: p.coords.longitude };
             document.getElementById('gps-status').innerText = "GPS: ON";
@@ -44,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newPIN = calculatePIN(currentCoords.lat, currentCoords.lon);
             if(newPIN !== locationPIN) {
                 locationPIN = newPIN;
-                document.getElementById('pin-display').innerText = `Security PIN: ${locationPIN}`;
+                pinDisplay.innerText = `Security PIN: ${locationPIN}`;
             }
 
             try {
@@ -53,23 +73,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
                 locDisplay.innerText = `🌐 ${currentTown}`;
             } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
-        }, null, { enableHighAccuracy: true });
+        }, (err) => {
+            document.getElementById('gps-status').innerText = "GPS: ERROR";
+        }, { enableHighAccuracy: true });
     }
     initGPS();
 
-    function showScreen(id) {
-        document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-        document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
-    }
-
     async function startCamera(facing) {
-        if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
-        video.srcObject = stream;
+        try {
+            if(stream) stream.getTracks().forEach(t => t.stop());
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
+            video.srcObject = stream;
+        } catch (err) { alert("Camera Error: " + err.message); }
     }
 
-    document.getElementById('nav-capture').onclick = () => showScreen('input-screen');
     document.getElementById('unlock-camera').onclick = () => {
         const jobId = document.getElementById('job-id-input').value.trim();
         const pinVerify = document.getElementById('pin-verification').value;
@@ -81,7 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('shutter').onclick = () => {
-        const mode = stream.getVideoTracks()[0].getSettings().facingMode;
+        const tracks = stream.getVideoTracks();
+        if (tracks.length === 0) return;
+        
+        const mode = tracks[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
         canvas.width = 1280; canvas.height = 720;
 
@@ -103,9 +123,10 @@ document.addEventListener('DOMContentLoaded', () => {
             new QRCode(qrTemp, { text: meta, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.H });
 
             setTimeout(() => {
-                ctx.drawImage(qrTemp.querySelector('img'), 1020, 440, 220, 220);
+                const qrImg = qrTemp.querySelector('img');
+                if (qrImg) ctx.drawImage(qrImg, 1020, 440, 220, 220);
                 document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.95);
-                stream.getTracks().forEach(t => t.stop());
+                if(stream) stream.getTracks().forEach(t => t.stop());
                 document.getElementById('review-overlay').style.display = 'flex';
                 document.getElementById('camera-controls').style.display = 'none';
             }, 600);
