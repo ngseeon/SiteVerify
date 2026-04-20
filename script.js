@@ -5,11 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const header = document.getElementById('app-header');
     
     let stream = null;
-    let rearPhoto = null; 
+    let rearPhotoData = null; 
     let currentCoords = { lat: 0, lon: 0 };
     let capturedPIN = "";
     let currentTown = "Gelang Patah";
 
+    // LOCKED SETTINGS LOGIC
     const fields = ['username', 'useremail', 'userphone', 'recemail', 'recphone'];
     const loadSettings = () => {
         fields.forEach(f => {
@@ -52,7 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
+        // Force 1280x720 capture for correct ratio
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } });
         video.srcObject = stream;
     }
 
@@ -65,22 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
         else { location.reload(); }
     };
 
+    // AMENDED CAPTURE LOGIC (Fixes Black Screen and Distortion)
     document.getElementById('shutter').onclick = () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
-        canvas.width = 1280; canvas.height = 720;
+        
+        // Locked Canvas Sizing
+        canvas.width = 1280; 
+        canvas.height = 720;
 
         if (mode !== 'user') {
             ctx.drawImage(video, 0, 0, 1280, 720);
-            rearPhoto = ctx.getImageData(0, 0, 1280, 720);
+            rearPhotoData = ctx.getImageData(0, 0, 1280, 720);
             startCamera("user");
         } else {
-            ctx.putImageData(rearPhoto, 0, 0); 
+            // Composite selfie onto rear photo before killing stream
+            ctx.putImageData(rearPhotoData, 0, 0); 
             ctx.lineWidth = 6; ctx.strokeStyle = "white";
             ctx.strokeRect(40, 460, 240, 240);
             ctx.drawImage(video, 40, 460, 240, 240);
             
-            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+            // Generate Static Buffer
+            const bufferUrl = canvas.toDataURL('image/jpeg', 0.9);
+            document.getElementById('pin-bg-preview').src = bufferUrl;
+            document.getElementById('final-document').src = bufferUrl;
+
             stream.getTracks().forEach(t => t.stop());
             
             const unix = Math.floor(Date.now() / 1000);
@@ -91,12 +102,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // AMENDED VERIFICATION (Fixes Missing QR Site Stamp)
     document.getElementById('verify-pin-btn').onclick = () => {
         if (document.getElementById('pin-input').value === capturedPIN) {
             const ctx = canvas.getContext('2d');
             const unix = Math.floor(Date.now() / 1000);
             const timeStr = document.getElementById('live-clock').innerText;
             
+            // 7-Point Metadata List
             const meta = `SiteVerify\nDate/Time: ${timeStr}\nUser: ${localStorage.getItem('sv_username')}\nPhone: ${localStorage.getItem('sv_userphone')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nUnix: ${unix}`;
             
             const qrTemp = document.getElementById('qrcode-temp');
@@ -104,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             new QRCode(qrTemp, { text: meta, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.H });
 
             setTimeout(() => {
+                // Stamp QR onto the composite
                 ctx.drawImage(qrTemp.querySelector('img'), 1020, 460, 220, 220);
                 document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
                 document.getElementById('pin-overlay').style.display = 'none';
