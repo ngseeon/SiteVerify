@@ -12,44 +12,19 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; }
 #video-feed { width: 100%; height: 100%; object-fit: cover; }
 
-/* FIX: STRUCTURAL RATIO LOCK */
-.ratio-lock { 
-    width: 100vw; 
-    max-height: 100vh;
-    aspect-ratio: 16 / 9; 
-    background: #000; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center;
-    overflow: hidden;
-}
-.baked-img { 
-    width: 100%; 
-    height: auto; 
-    object-fit: contain; 
-}
+/* RATIO LOCK */
+.ratio-lock { width: 100vw; aspect-ratio: 16 / 9; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.baked-img { width: 100%; height: auto; object-fit: contain; }
 
 .overlay-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index: 3000; display: flex; flex-direction: column; justify-content: center; }
-.overlay-glass { position: absolute; top:0; left:0; width:100%; height:100%; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 3500; background: #000; }
 
-/* FIX: 92% TRANSPARENCY PIN BOX */
-.pin-box { 
-    position: absolute; 
-    background: rgba(255, 255, 255, 0.08); 
-    backdrop-filter: blur(25px); 
-    padding: 30px; 
-    border-radius: 20px; 
-    width: 85%; 
-    text-align: center; 
-    border: 1px solid rgba(255,255,255,0.1); 
-    color: #fff;
-}
-.pin-label { color: #fff; font-size: 18px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
-.pin-box input { width: 100%; padding: 15px; font-size: 24px; text-align: center; border-radius: 12px; border: 1px solid #ddd; margin: 20px 0; background: rgba(255,255,255,0.9); }
+/* PIN DISPLAY BOX */
+.pin-box-inline { background: #f9f9f9; padding: 15px; font-size: 20px; font-weight: bold; text-align: center; border-radius: 10px; border: 2px dashed #ff0000; color: #ff0000; margin-bottom: 10px; }
 
 .action-bar-bottom { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 15px; z-index: 2000; }
 .btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .btn-red-wide { width: 100%; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 10px; }
+.btn-grey-wide { width: 100%; height: 50px; background: #666; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 15px; margin-top: 10px; }
 
 .settings-container { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
 .field-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; }
