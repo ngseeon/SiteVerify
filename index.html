@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v22.0 - Phase 2 Final</title>
+    <title>SiteVerify v23.0 - Phase 2 Final</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -12,7 +12,7 @@
     <header id="app-header">
         <div class="header-top">
             <span id="gps-status">GPS: PENDING</span>
-            <span id="settings-gear">⚙</span>
+            <span id="settings-gear" style="cursor:pointer">⚙</span>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" alt="Logo" class="app-logo">
@@ -31,52 +31,4 @@
         </div>
     </section>
 
-    <section id="settings-screen" class="app-screen" style="display:none">
-        <div class="settings-container">
-            <h2>System Settings</h2>
-            <div class="field-group"><label>User Name</label><input type="text" id="set-username"></div>
-            <div class="field-group"><label>User Email</label><input type="email" id="set-useremail"></div>
-            <div class="field-group"><label>User Phone Number</label><input type="text" id="set-userphone"></div>
-            <div class="field-group"><label>Recipient Email</label><input type="email" id="set-recemail"></div>
-            <div class="field-group"><label>WhatsApp Phone</label><input type="text" id="set-recphone"></div>
-            <button id="save-settings" class="btn-red-wide">Save System Setting</button>
-        </div>
-    </section>
-
-    <section id="camera-screen" class="app-screen full-view" style="display:none">
-        <video id="video-feed" autoplay playsinline></video>
-        <canvas id="capture-canvas" style="display:none;"></canvas>
-        
-        <div id="pin-overlay" class="overlay-glass" style="display:none">
-            <div class="pin-box">
-                <p class="pin-label">Enter Security PIN <span id="generated-pin" style="color:#ff0000; font-weight:bold;">0000</span></p>
-                <input type="number" id="pin-input" placeholder="4-digit PIN">
-                <button id="verify-pin-btn" class="btn-red-wide">Verify & Lock Data</button>
-            </div>
-        </div>
-
-        <div id="review-overlay" class="overlay-screen" style="display:none">
-            <img id="final-document" class="full-preview-img">
-            
-            <div id="save-controls" class="action-bar-bottom">
-                <button id="save-to-device" class="btn-red">Save to Device</button>
-                <button id="discard-btn" class="btn-red">Discard</button>
-            </div>
-            
-            <div id="share-controls" class="action-bar-bottom" style="display:none">
-                <button id="share-whatsapp" class="btn-red">WhatsApp</button>
-                <button id="share-gmail" class="btn-red">Gmail App</button>
-                <button id="final-back" class="btn-red">Back</button>
-            </div>
-        </div>
-
-        <div class="action-bar-bottom" id="camera-controls">
-            <button id="shutter" class="btn-red">Capture</button>
-            <button id="cam-back" class="btn-red">Back</button>
-        </div>
-    </section>
-
-    <div id="qrcode-temp" style="display:none;"></div>
-    <script src="script.js"></script>
-</body>
-</html>
+    <section id="settings-screen" class="app-screen"
