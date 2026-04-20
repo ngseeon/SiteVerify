@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v24.5 - Stable Build</title>
+    <title>SiteVerify v24.8 - Solid Build</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -12,7 +12,7 @@
     <header id="app-header">
         <div class="header-top">
             <span id="gps-status">GPS: PENDING</span>
-            <div id="settings-gear" style="cursor:pointer; padding: 10px;">⚙</div>
+            <span id="settings-gear" style="cursor:pointer; font-size: 22px;">⚙</span>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" alt="Logo" class="app-logo">
@@ -50,13 +50,12 @@
     <section id="settings-screen" class="app-screen" style="display:none">
         <div class="settings-container">
             <h2>System Settings</h2>
-            <div class="field-group"><label>User Name</label><input type="text" id="set-username"></div>
-            <div class="field-group"><label>User Email</label><input type="email" id="set-useremail"></div>
-            <div class="field-group"><label>User Phone Number</label><input type="text" id="set-userphone"></div>
-            <div class="field-group"><label>Recipient Email</label><input type="email" id="set-recemail"></div>
-            <div class="field-group"><label>WhatsApp Phone</label><input type="text" id="set-recphone"></div>
+            <div class="field-group"><label>USER NAME</label><input type="text" id="set-username"></div>
+            <div class="field-group"><label>USER EMAIL</label><input type="email" id="set-useremail"></div>
+            <div class="field-group"><label>USER PHONE NUMBER</label><input type="text" id="set-userphone"></div>
+            <div class="field-group"><label>RECIPIENT EMAIL</label><input type="email" id="set-recemail"></div>
+            <div class="field-group"><label>WHATSAPP PHONE</label><input type="text" id="set-recphone"></div>
             <button id="save-settings" class="btn-red-wide">Save System Setting</button>
-            <button id="back-settings" class="btn-grey-wide">Back</button>
         </div>
     </section>
 
