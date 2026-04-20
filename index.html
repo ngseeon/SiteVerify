@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v24.3 - Fixed Initialization</title>
+    <title>SiteVerify v24.5 - Stable Build</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -12,7 +12,7 @@
     <header id="app-header">
         <div class="header-top">
             <span id="gps-status">GPS: PENDING</span>
-            <span id="settings-gear" style="cursor:pointer; font-size: 20px;">⚙</span>
+            <div id="settings-gear" style="cursor:pointer; padding: 10px;">⚙</div>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" alt="Logo" class="app-logo">
@@ -33,13 +33,13 @@
 
     <section id="input-screen" class="app-screen" style="display:none">
         <div class="settings-container">
-            <h2>SiteVerify Initialization</h2>
+            <h2 style="text-align:center;">SiteVerify Initialization</h2>
             <div class="field-group">
                 <label>SiteVerify Job ID</label>
                 <input type="text" id="job-id-input" maxlength="20" placeholder="Max 20 Characters">
             </div>
             <div class="field-group">
-                <div id="pin-display" class="pin-box-inline">Security PIN: (Waiting for GPS)</div>
+                <div id="pin-display" class="pin-box-inline">Security PIN: (Acquiring...)</div>
                 <input type="number" id="pin-verification" placeholder="Enter Security PIN to Unlock">
             </div>
             <button id="unlock-camera" class="btn-red-wide">Unlock Camera</button>
