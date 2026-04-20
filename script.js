@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let currentCoords = { lat: 0, lon: 0 };
     let currentTown = "Detecting...";
-    let locationPIN = ""; 
+    let MASTER_PIN = ""; // STRICT MASTER LOCK
     let stream = null;
     let rearPhotoData = null;
     let activeJobID = "";
@@ -21,11 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(id).style.display = 'block';
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
         
-        // Lock PIN once when entering the screen
+        // PIN LOCK LOGIC: Generate ONCE per session
         if (id === 'input-screen') {
-            if (currentCoords.lat !== 0) {
-                locationPIN = calculateStaticPIN(currentCoords.lat, currentCoords.lon);
-                pinDisplay.innerText = `Security PIN: ${locationPIN}`;
+            if (currentCoords.lat !== 0 && MASTER_PIN === "") {
+                MASTER_PIN = calculateStaticPIN(currentCoords.lat, currentCoords.lon);
+                pinDisplay.innerText = `Security PIN: ${MASTER_PIN}`;
+            } else if (MASTER_PIN !== "") {
+                pinDisplay.innerText = `Security PIN: ${MASTER_PIN}`;
             } else {
                 pinDisplay.innerText = "Security PIN: (Acquiring GPS...)";
             }
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
     document.getElementById('cam-back').onclick = () => location.reload();
 
+    // LOAD SETTINGS
     const loadSettings = () => {
         ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
             const val = localStorage.getItem(`sv_${f}`);
@@ -52,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('menu-screen');
     };
 
+    // GPS WATCHER (Background updates for logic only)
     function initGPS() {
         if (!navigator.geolocation) return;
         navigator.geolocation.watchPosition(async (p) => {
@@ -72,16 +76,23 @@ document.addEventListener('DOMContentLoaded', () => {
         clockDisplay.innerText = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
     }, 1000);
 
+    // CAMERA LOGIC
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
-        document.getElementById('video-feed').srcObject = stream;
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
+            });
+            const video = document.getElementById('video-feed');
+            video.srcObject = stream;
+        } catch (err) { alert("Camera Permission Required."); }
     }
 
     document.getElementById('unlock-camera').onclick = () => {
         const idVal = document.getElementById('job-id-input').value.trim();
         const pinVal = document.getElementById('pin-verification').value;
-        if (idVal && pinVal === locationPIN) {
+        // Strict match against the MASTER_PIN
+        if (idVal && pinVal === MASTER_PIN) {
             activeJobID = idVal;
             showScreen('camera-screen');
             startCamera("environment");
@@ -105,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.strokeRect(40, 440, 260, 260);
             ctx.drawImage(video, 40, 440, 260, 260);
             
-            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${clockDisplay.innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}`;
+            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}`;
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
             new QRCode(qrTemp, { text: meta, width: 220, height: 220 });
@@ -131,12 +142,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('share-whatsapp').onclick = () => {
-        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
-        window.open(`https://wa.me/${localStorage.getItem('sv_recphone').replace(/\+/g,'')}?text=${msg}`);
+        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        window.open(`https://wa.me/${(localStorage.getItem('sv_recphone')||'').replace(/\+/g,'')}?text=${msg}`);
     };
 
     document.getElementById('share-gmail').onclick = () => {
-        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
         window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify: ${activeJobID}&body=${body}`;
     };
 
