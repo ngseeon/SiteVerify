@@ -10,11 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let locationPIN = "";
     let activeJobID = "";
 
-    // PIN CALCULATION: Total Lat+Lon, last 4 digits after decimal
+    // PIN LOGIC: Sum of Lat decimals + Lon decimals (Not fixed to 4 digits)
     function calculatePIN(lat, lon) {
-        const total = Math.abs(lat) + Math.abs(lon);
-        const decimalStr = total.toString().split('.')[1] || "0000";
-        return decimalStr.padEnd(4, '0').slice(-4);
+        const latDec = parseInt(Math.abs(lat).toString().split('.')[1] || "0");
+        const lonDec = parseInt(Math.abs(lon).toString().split('.')[1] || "0");
+        return (latDec + lonDec).toString();
     }
 
     const loadSettings = () => {
@@ -40,14 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
         navigator.geolocation.watchPosition(async (p) => {
             currentCoords = { lat: p.coords.latitude, lon: p.coords.longitude };
             document.getElementById('gps-status').innerText = "GPS: ON";
-            locationPIN = calculatePIN(currentCoords.lat, currentCoords.lon);
-            document.getElementById('pin-display').innerText = `Your Location PIN: ${locationPIN}`;
+            
+            const newPIN = calculatePIN(currentCoords.lat, currentCoords.lon);
+            if(newPIN !== locationPIN) {
+                locationPIN = newPIN;
+                document.getElementById('pin-display').innerText = `Security PIN: ${locationPIN}`;
+            }
 
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentCoords.lat}&lon=${currentCoords.lon}`);
                 const data = await res.json();
-                const addr = data.address;
-                currentTown = addr.neighbourhood || addr.suburb || addr.town || addr.city || "Gelang Patah";
+                currentTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
                 locDisplay.innerText = `🌐 ${currentTown}`;
             } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
         }, null, { enableHighAccuracy: true });
@@ -67,20 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('nav-capture').onclick = () => showScreen('input-screen');
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
-
     document.getElementById('unlock-camera').onclick = () => {
         const jobId = document.getElementById('job-id-input').value.trim();
         const pinVerify = document.getElementById('pin-verification').value;
-
         if (jobId && pinVerify === locationPIN) {
             activeJobID = jobId;
             showScreen('camera-screen');
             startCamera("environment");
-        } else {
-            alert("Please enter Job ID and correct Location PIN");
-        }
+        } else { alert("Correct Job ID and PIN Required."); }
     };
 
     document.getElementById('shutter').onclick = () => {
@@ -98,10 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.strokeRect(40, 440, 260, 260);
             ctx.drawImage(video, 40, 440, 260, 260);
             
-            // STAMPING PHASE
-            const unix = Math.floor(Date.now() / 1000);
             const timeStr = document.getElementById('live-clock').innerText;
-            const meta = `SiteVerify\nJob ID: ${activeJobID}\nPIN: ${locationPIN}\nDate/Time: ${timeStr}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nUnix: ${unix}`;
+            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${timeStr}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}`;
             
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
@@ -127,13 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('share-whatsapp').onclick = () => {
-        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${document.getElementById('live-clock').innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${document.getElementById('live-clock').innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
         window.open(`https://wa.me/${localStorage.getItem('sv_recphone').replace(/\+/g,'')}?text=${msg}`);
     };
 
     document.getElementById('share-gmail').onclick = () => {
-        const body = encodeURIComponent(`Verification Summary:\nJob ID: ${activeJobID}\nPIN: ${locationPIN}\nUser: ${localStorage.getItem('sv_username')}\nLocation: ${currentTown}\nGPS: ${currentCoords.lat}, ${currentCoords.lon}\nTime: ${document.getElementById('live-clock').innerText}`);
-        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify Lock: ${activeJobID}&body=${body}`;
+        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${locationPIN}\nTime: ${document.getElementById('live-clock').innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify: ${activeJobID}&body=${body}`;
     };
 
     document.getElementById('discard-btn').onclick = () => location.reload();
