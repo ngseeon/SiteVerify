@@ -1,37 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const video = document.getElementById('video-feed');
-    const canvas = document.getElementById('capture-canvas');
-    const locDisplay = document.getElementById('location-display');
+    // 1. SELECTORS & STATE
     const pinDisplay = document.getElementById('pin-display');
+    const locDisplay = document.getElementById('location-display');
     
-    let stream = null;
-    let rearPhotoData = null; 
     let currentCoords = { lat: 0, lon: 0 };
     let currentTown = "Gelang Patah";
     let locationPIN = "";
+    let stream = null;
+    let rearPhotoData = null;
     let activeJobID = "";
 
-    // PIN LOGIC: Sum of decimals from Lat and Lon
-    function calculatePIN(lat, lon) {
-        const latStr = lat.toString().split('.')[1] || "0";
-        const lonStr = lon.toString().split('.')[1] || "0";
-        return (parseInt(latStr) + parseInt(lonStr)).toString();
+    // 2. MATH: Total sum of decimals
+    function getPIN(lat, lon) {
+        const latPart = lat.toString().split('.')[1] || "0";
+        const lonPart = lon.toString().split('.')[1] || "0";
+        return (parseInt(latPart) + parseInt(lonPart)).toString();
     }
 
+    // 3. UI ENGINE (Independent from GPS for speed)
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
-        const target = document.getElementById(id);
-        if (target) target.style.display = 'block';
+        document.getElementById(id).style.display = 'block';
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
+        
+        // If opening input screen, freeze the current PIN
+        if (id === 'input-screen' && currentCoords.lat !== 0) {
+            locationPIN = getPIN(currentCoords.lat, currentCoords.lon);
+            pinDisplay.innerText = `Security PIN: ${locationPIN}`;
+        }
     };
 
-    // BUTTON LISTENERS (Moved to top for stability)
+    // Global Listeners
     document.getElementById('nav-capture').onclick = () => showScreen('input-screen');
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
     document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
     document.getElementById('back-settings').onclick = () => showScreen('menu-screen');
     document.getElementById('cam-back').onclick = () => location.reload();
 
+    // 4. SETTINGS
     const loadSettings = () => {
         ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
             const val = localStorage.getItem(`sv_${f}`);
@@ -47,61 +53,50 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('menu-screen');
     };
 
+    // 5. CLOCK (Stable 1s interval)
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
     }, 1000);
 
+    // 6. GPS (Update coordinates in background, but don't force UI refresh)
     function initGPS() {
-        if (!navigator.geolocation) {
-            document.getElementById('gps-status').innerText = "GPS: NOT SUPPORTED";
-            return;
-        }
-        
+        if (!navigator.geolocation) return;
         navigator.geolocation.watchPosition(async (p) => {
             currentCoords = { lat: p.coords.latitude, lon: p.coords.longitude };
             document.getElementById('gps-status').innerText = "GPS: ON";
             
-            const newPIN = calculatePIN(currentCoords.lat, currentCoords.lon);
-            if(newPIN !== locationPIN) {
-                locationPIN = newPIN;
-                pinDisplay.innerText = `Security PIN: ${locationPIN}`;
-            }
-
+            // Reverse Geocode only once every 30 seconds to save power
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentCoords.lat}&lon=${currentCoords.lon}`);
                 const data = await res.json();
                 currentTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
                 locDisplay.innerText = `🌐 ${currentTown}`;
             } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
-        }, (err) => {
-            document.getElementById('gps-status').innerText = "GPS: ERROR";
-        }, { enableHighAccuracy: true });
+        }, null, { enableHighAccuracy: true });
     }
     initGPS();
 
+    // 7. CAMERA & WORKFLOW
     async function startCamera(facing) {
-        try {
-            if(stream) stream.getTracks().forEach(t => t.stop());
-            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
-            video.srcObject = stream;
-        } catch (err) { alert("Camera Error: " + err.message); }
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
+        document.getElementById('video-feed').srcObject = stream;
     }
 
     document.getElementById('unlock-camera').onclick = () => {
-        const jobId = document.getElementById('job-id-input').value.trim();
-        const pinVerify = document.getElementById('pin-verification').value;
-        if (jobId && pinVerify === locationPIN) {
-            activeJobID = jobId;
+        const idInput = document.getElementById('job-id-input').value.trim();
+        const pinInput = document.getElementById('pin-verification').value;
+        if (idInput && pinInput === locationPIN) {
+            activeJobID = idInput;
             showScreen('camera-screen');
             startCamera("environment");
-        } else { alert("Correct Job ID and PIN Required."); }
+        } else { alert("Verify Job ID and Security PIN."); }
     };
 
     document.getElementById('shutter').onclick = () => {
-        const tracks = stream.getVideoTracks();
-        if (tracks.length === 0) return;
-        
-        const mode = tracks[0].getSettings().facingMode;
+        const video = document.getElementById('video-feed');
+        const canvas = document.getElementById('capture-canvas');
+        const mode = stream.getVideoTracks()[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
         canvas.width = 1280; canvas.height = 720;
 
@@ -120,13 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
-            new QRCode(qrTemp, { text: meta, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.H });
+            new QRCode(qrTemp, { text: meta, width: 220, height: 220 });
 
             setTimeout(() => {
                 const qrImg = qrTemp.querySelector('img');
                 if (qrImg) ctx.drawImage(qrImg, 1020, 440, 220, 220);
                 document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.95);
-                if(stream) stream.getTracks().forEach(t => t.stop());
+                stream.getTracks().forEach(t => t.stop());
                 document.getElementById('review-overlay').style.display = 'flex';
                 document.getElementById('camera-controls').style.display = 'none';
             }, 600);
