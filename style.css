@@ -17,7 +17,7 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 
 .overlay-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:#000; z-index: 3000; display: flex; flex-direction: column; justify-content: center; }
 
-.pin-box-inline { background: #fff; padding: 15px; font-size: 22px; font-weight: bold; text-align: center; border-radius: 10px; border: 2px solid #ff0000; color: #ff0000; margin-bottom: 10px; }
+.pin-box-inline { background: #fff; padding: 15px; font-size: 20px; font-weight: bold; text-align: center; border-radius: 10px; border: 2px solid #ff0000; color: #ff0000; margin-bottom: 10px; }
 
 .action-bar-bottom { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 15px; z-index: 2000; }
 .btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
