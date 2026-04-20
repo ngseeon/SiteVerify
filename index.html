@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v24.8 - Solid Build</title>
+    <title>SiteVerify v25.0 - PIN Master Lock</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -60,7 +60,9 @@
     </section>
 
     <section id="camera-screen" class="app-screen full-view" style="display:none">
-        <video id="video-feed" autoplay playsinline></video>
+        <div class="camera-wrap">
+            <video id="video-feed" autoplay playsinline></video>
+        </div>
         <canvas id="capture-canvas" style="display:none;"></canvas>
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="ratio-lock"><img id="final-document" class="baked-img"></div>
