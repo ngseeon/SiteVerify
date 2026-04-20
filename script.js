@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let capturedPIN = "";
     let currentTown = "Gelang Patah";
 
-    // LOCKED SETTINGS LOGIC
     const fields = ['username', 'useremail', 'userphone', 'recemail', 'recphone'];
     const loadSettings = () => {
         fields.forEach(f => {
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 const addr = data.address;
                 let detected = addr.neighbourhood || addr.suburb || addr.residential || addr.town || addr.city;
-                currentTown = (detected === "Iskandar Puteri") ? "Gelang Patah" : (detected || "Gelang Patah");
+                currentTown = detected || "Gelang Patah";
                 locDisplay.innerText = `🌐 ${currentTown}`;
             } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
         }, null, { enableHighAccuracy: true });
@@ -53,8 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        // Force 1280x720 capture for correct ratio
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
         video.srcObject = stream;
     }
 
@@ -67,30 +65,27 @@ document.addEventListener('DOMContentLoaded', () => {
         else { location.reload(); }
     };
 
-    // AMENDED CAPTURE LOGIC (Fixes Black Screen and Distortion)
+    // BAKE-AND-SHOW CAPTURE LOGIC
     document.getElementById('shutter').onclick = () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
-        
-        // Locked Canvas Sizing
-        canvas.width = 1280; 
-        canvas.height = 720;
+        canvas.width = 1280; canvas.height = 720;
 
         if (mode !== 'user') {
             ctx.drawImage(video, 0, 0, 1280, 720);
             rearPhotoData = ctx.getImageData(0, 0, 1280, 720);
             startCamera("user");
         } else {
-            // Composite selfie onto rear photo before killing stream
+            // COMPOSITE: Rear + Selfie Overlay
             ctx.putImageData(rearPhotoData, 0, 0); 
             ctx.lineWidth = 6; ctx.strokeStyle = "white";
-            ctx.strokeRect(40, 460, 240, 240);
-            ctx.drawImage(video, 40, 460, 240, 240);
+            ctx.strokeRect(40, 440, 260, 260); // Standardized selfie box
+            ctx.drawImage(video, 40, 440, 260, 260);
             
-            // Generate Static Buffer
-            const bufferUrl = canvas.toDataURL('image/jpeg', 0.9);
-            document.getElementById('pin-bg-preview').src = bufferUrl;
-            document.getElementById('final-document').src = bufferUrl;
+            // BAKE TO IMG: Prevents black screen
+            const currentDoc = canvas.toDataURL('image/jpeg', 0.95);
+            document.getElementById('pin-bg-preview').src = currentDoc;
+            document.getElementById('final-document').src = currentDoc;
 
             stream.getTracks().forEach(t => t.stop());
             
@@ -102,14 +97,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // AMENDED VERIFICATION (Fixes Missing QR Site Stamp)
+    // FINAL STAMPING: QR CODE RE-INTEGRATION
     document.getElementById('verify-pin-btn').onclick = () => {
         if (document.getElementById('pin-input').value === capturedPIN) {
             const ctx = canvas.getContext('2d');
             const unix = Math.floor(Date.now() / 1000);
             const timeStr = document.getElementById('live-clock').innerText;
             
-            // 7-Point Metadata List
             const meta = `SiteVerify\nDate/Time: ${timeStr}\nUser: ${localStorage.getItem('sv_username')}\nPhone: ${localStorage.getItem('sv_userphone')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}\nUnix: ${unix}`;
             
             const qrTemp = document.getElementById('qrcode-temp');
@@ -117,12 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
             new QRCode(qrTemp, { text: meta, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.H });
 
             setTimeout(() => {
-                // Stamp QR onto the composite
-                ctx.drawImage(qrTemp.querySelector('img'), 1020, 460, 220, 220);
-                document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+                const qrImg = qrTemp.querySelector('img');
+                ctx.drawImage(qrImg, 1020, 440, 220, 220); // Stamp QR bottom-right
+                const finalImg = canvas.toDataURL('image/jpeg', 1.0);
+                document.getElementById('final-document').src = finalImg;
                 document.getElementById('pin-overlay').style.display = 'none';
                 document.getElementById('review-overlay').style.display = 'block';
-            }, 500);
+            }, 600);
         } else { alert("Wrong PIN"); }
     };
 
