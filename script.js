@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1280, height: 720 } });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } });
         video.srcObject = stream;
     }
 
@@ -65,27 +65,26 @@ document.addEventListener('DOMContentLoaded', () => {
         else { location.reload(); }
     };
 
-    // BAKE-AND-SHOW CAPTURE LOGIC
     document.getElementById('shutter').onclick = () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
-        canvas.width = 1280; canvas.height = 720;
+        canvas.width = 1280; canvas.height = 720; // STRICT RATIO LOCK
 
         if (mode !== 'user') {
             ctx.drawImage(video, 0, 0, 1280, 720);
             rearPhotoData = ctx.getImageData(0, 0, 1280, 720);
             startCamera("user");
         } else {
-            // COMPOSITE: Rear + Selfie Overlay
+            // STEP 1: BAKE BACKGROUND & SELFIE
             ctx.putImageData(rearPhotoData, 0, 0); 
             ctx.lineWidth = 6; ctx.strokeStyle = "white";
-            ctx.strokeRect(40, 440, 260, 260); // Standardized selfie box
+            ctx.strokeRect(40, 440, 260, 260);
             ctx.drawImage(video, 40, 440, 260, 260);
             
-            // BAKE TO IMG: Prevents black screen
-            const currentDoc = canvas.toDataURL('image/jpeg', 0.95);
-            document.getElementById('pin-bg-preview').src = currentDoc;
-            document.getElementById('final-document').src = currentDoc;
+            // STEP 2: CONVERT TO STATIC IMG IMMEDIATELY
+            const snapshot = canvas.toDataURL('image/jpeg', 0.95);
+            document.getElementById('pin-bg-preview').src = snapshot;
+            document.getElementById('final-document').src = snapshot;
 
             stream.getTracks().forEach(t => t.stop());
             
@@ -97,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // FINAL STAMPING: QR CODE RE-INTEGRATION
     document.getElementById('verify-pin-btn').onclick = () => {
         if (document.getElementById('pin-input').value === capturedPIN) {
             const ctx = canvas.getContext('2d');
@@ -112,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setTimeout(() => {
                 const qrImg = qrTemp.querySelector('img');
-                ctx.drawImage(qrImg, 1020, 440, 220, 220); // Stamp QR bottom-right
+                ctx.drawImage(qrImg, 1020, 440, 220, 220); // STAMP QR
                 const finalImg = canvas.toDataURL('image/jpeg', 1.0);
                 document.getElementById('final-document').src = finalImg;
                 document.getElementById('pin-overlay').style.display = 'none';
