@@ -1,16 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // UI Elements
     const pinDisplay = document.getElementById('pin-display');
     const locDisplay = document.getElementById('location-display');
     const clockDisplay = document.getElementById('live-clock');
     
-    let currentCoords = { lat: 0, lon: 0 };
-    let currentTown = "Detecting...";
-    let MASTER_PIN = ""; // STRICT MASTER LOCK
+    // Live Background GPS Variables
+    let liveLat = 0, liveLon = 0;
+    let liveTown = "Detecting...";
+
+    // THE AUDIT SNAPSHOT (LOCKED FOR THE SESSION)
+    let sessionLat = 0;
+    let sessionLon = 0;
+    let sessionPIN = "";
+    
     let stream = null;
     let rearPhotoData = null;
     let activeJobID = "";
 
-    function calculateStaticPIN(lat, lon) {
+    function calculatePIN(lat, lon) {
         const latDec = lat.toString().split('.')[1] || "0";
         const lonDec = lon.toString().split('.')[1] || "0";
         return (parseInt(latDec) + parseInt(lonDec)).toString();
@@ -20,26 +27,30 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
-        
-        // PIN LOCK LOGIC: Generate ONCE per session
-        if (id === 'input-screen') {
-            if (currentCoords.lat !== 0 && MASTER_PIN === "") {
-                MASTER_PIN = calculateStaticPIN(currentCoords.lat, currentCoords.lon);
-                pinDisplay.innerText = `Security PIN: ${MASTER_PIN}`;
-            } else if (MASTER_PIN !== "") {
-                pinDisplay.innerText = `Security PIN: ${MASTER_PIN}`;
-            } else {
-                pinDisplay.innerText = "Security PIN: (Acquiring GPS...)";
-            }
-        }
     };
 
-    document.getElementById('nav-capture').onclick = () => showScreen('input-screen');
+    // TRIGGER SNAPSHOT ON MENU BUTTON CLICK
+    document.getElementById('nav-capture').onclick = () => {
+        if (liveLat === 0) {
+            alert("Waiting for GPS lock. Please try again in a few seconds.");
+            return;
+        }
+        // Take the absolute snapshot for the audit trail
+        sessionLat = liveLat;
+        sessionLon = liveLon;
+        sessionPIN = calculatePIN(sessionLat, sessionLon);
+        
+        pinDisplay.innerText = `Security PIN: ${sessionPIN}`;
+        showScreen('input-screen');
+    };
+
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
+    document.getElementById('cancel-input').onclick = () => {
+        sessionPIN = ""; // Clear snapshot on cancel
+        showScreen('menu-screen');
+    };
     document.getElementById('cam-back').onclick = () => location.reload();
 
-    // LOAD SETTINGS
     const loadSettings = () => {
         ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
             const val = localStorage.getItem(`sv_${f}`);
@@ -55,19 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('menu-screen');
     };
 
-    // GPS WATCHER (Background updates for logic only)
+    // BACKGROUND GPS WATCHER
     function initGPS() {
         if (!navigator.geolocation) return;
         navigator.geolocation.watchPosition(async (p) => {
-            currentCoords = { lat: p.coords.latitude, lon: p.coords.longitude };
+            liveLat = p.coords.latitude;
+            liveLon = p.coords.longitude;
             document.getElementById('gps-status').innerText = "GPS: ON";
             
             try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${currentCoords.lat}&lon=${currentCoords.lon}`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${liveLat}&lon=${liveLon}`);
                 const data = await res.json();
-                currentTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
-                locDisplay.innerText = `🌐 ${currentTown}`;
-            } catch (e) { locDisplay.innerText = "🌐 Gelang Patah"; }
+                liveTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
+                locDisplay.innerText = `🌐 ${liveTown}`;
+            } catch (e) { locDisplay.innerText = `🌐 ${liveTown}`; }
         }, null, { enableHighAccuracy: true });
     }
     initGPS();
@@ -76,27 +88,28 @@ document.addEventListener('DOMContentLoaded', () => {
         clockDisplay.innerText = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
     }, 1000);
 
-    // CAMERA LOGIC
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
                 video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
             });
-            const video = document.getElementById('video-feed');
-            video.srcObject = stream;
-        } catch (err) { alert("Camera Permission Required."); }
+            document.getElementById('video-feed').srcObject = stream;
+        } catch (err) { alert("Camera Access Required."); }
     }
 
     document.getElementById('unlock-camera').onclick = () => {
         const idVal = document.getElementById('job-id-input').value.trim();
         const pinVal = document.getElementById('pin-verification').value;
-        // Strict match against the MASTER_PIN
-        if (idVal && pinVal === MASTER_PIN) {
+        
+        // Strictly compare typed PIN with the Snapshot PIN
+        if (idVal && pinVal === sessionPIN) {
             activeJobID = idVal;
             showScreen('camera-screen');
             startCamera("environment");
-        } else { alert("Verification Failed. PIN must match exactly."); }
+        } else {
+            alert("Verification Failed. PIN must match exactly.");
+        }
     };
 
     document.getElementById('shutter').onclick = () => {
@@ -111,12 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, 1280, 720);
             startCamera("user");
         } else {
+            // Composite Image
             ctx.putImageData(rearPhotoData, 0, 0); 
             ctx.lineWidth = 6; ctx.strokeStyle = "white";
             ctx.strokeRect(40, 440, 260, 260);
             ctx.drawImage(video, 40, 440, 260, 260);
             
-            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${currentTown}\nGPS: ${currentCoords.lat},${currentCoords.lon}`;
+            // Metadata uses SESSION SNAPSHOT for 100% Audit Consistency
+            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${liveTown}\nGPS: ${sessionLat},${sessionLon}`;
+            
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
             new QRCode(qrTemp, { text: meta, width: 220, height: 220 });
@@ -142,12 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('share-whatsapp').onclick = () => {
-        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${sessionLat},${sessionLon}`);
         window.open(`https://wa.me/${(localStorage.getItem('sv_recphone')||'').replace(/\+/g,'')}?text=${msg}`);
     };
 
     document.getElementById('share-gmail').onclick = () => {
-        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${MASTER_PIN}\nTime: ${clockDisplay.innerText}\nGPS: ${currentCoords.lat},${currentCoords.lon}`);
+        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${sessionLat},${sessionLon}`);
         window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify: ${activeJobID}&body=${body}`;
     };
 
