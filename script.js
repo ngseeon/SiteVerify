@@ -1,31 +1,178 @@
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #fff; }
+document.addEventListener('DOMContentLoaded', () => {
+    const pinDisplay = document.getElementById('pin-display');
+    const locDisplay = document.getElementById('location-display');
+    const clockDisplay = document.getElementById('live-clock');
+    
+    let liveLat = 0, liveLon = 0, liveTown = "Detecting...";
+    let sessionLat = 0, sessionLon = 0, sessionPIN = "", sessionUnix = 0, sessionDate = "", sessionTime = "";
+    let masterAuditBody = ""; 
 
-#app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px 15px; border-bottom: 1px solid #ddd; }
-.header-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; font-family: monospace; height: 25px; }
-.logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; }
-.app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
-.header-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; font-family: monospace; }
-.header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
+    let stream = null, rearPhotoData = null, activeJobID = "";
 
-.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; display: none; background: #fff; overflow-y: auto; }
-#menu-screen { display: block; }
+    function calculatePIN(lat, lon) {
+        const latDec = lat.toString().split('.')[1] || "0";
+        const lonDec = lon.toString().split('.')[1] || "0";
+        return (parseInt(latDec) + parseInt(lonDec)).toString();
+    }
 
-.full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; overflow: hidden; }
-.camera-wrap { width: 100vw; height: 100vh; position: relative; background: #000; display: flex; justify-content: center; align-items: center; }
-#video-feed { width: 100%; height: 100%; object-fit: cover; }
+    const showScreen = (id) => {
+        document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+        document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
+    };
 
-.pin-box-inline { background: #fff; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; border-radius: 10px; border: 3px solid #ff0000; color: #ff0000; margin-bottom: 10px; }
+    document.getElementById('nav-capture').onclick = () => {
+        if (liveLat === 0) { alert("GPS Lock Pending..."); return; }
+        sessionLat = liveLat; sessionLon = liveLon;
+        sessionPIN = calculatePIN(sessionLat, sessionLon);
+        pinDisplay.innerText = `Security PIN: ${sessionPIN}`;
+        showScreen('input-screen');
+    };
 
-.action-bar-bottom { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 10px; z-index: 2000; }
-.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 15px; }
-.btn-red-wide { width: 100%; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 10px; }
-.btn-grey-wide { width: 100%; height: 50px; background: #666; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 15px; margin-top: 10px; }
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
+    document.getElementById('cam-back').onclick = () => location.reload();
 
-.settings-container { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-.field-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 4px; display: block; }
-.field-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; }
+    const loadSettings = () => {
+        ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
+            const val = localStorage.getItem(`sv_${f}`);
+            if (val) document.getElementById(`set-${f}`).value = val;
+        });
+    };
+    loadSettings();
 
-.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 3000; padding-top: 20px; }
-.ratio-lock { width: 100%; display: flex; justify-content: center; }
-.baked-img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; border: none; outline: none; }
+    document.getElementById('save-settings').onclick = () => {
+        ['username', 'useremail', 'userphone', 'recemail', 'recphone'].forEach(f => {
+            localStorage.setItem(`sv_${f}`, document.getElementById(`set-${f}`).value);
+        });
+        showScreen('menu-screen');
+    };
+
+    function initGPS() {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.watchPosition(async (p) => {
+            liveLat = p.coords.latitude; liveLon = p.coords.longitude;
+            document.getElementById('gps-status').innerText = "GPS: ON";
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${liveLat}&lon=${liveLon}`);
+                const data = await res.json();
+                liveTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Site Location";
+                locDisplay.innerText = `🌐 ${liveTown}`;
+            } catch (e) { locDisplay.innerText = "🌐 Iskandar Puteri"; }
+        }, null, { enableHighAccuracy: true });
+    }
+    initGPS();
+
+    setInterval(() => {
+        clockDisplay.innerText = new Date().toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).replace(',','');
+    }, 1000);
+
+    async function startCamera(facing) {
+        if(stream) stream.getTracks().forEach(t => t.stop());
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
+            });
+            document.getElementById('video-feed').srcObject = stream;
+        } catch (err) { alert("Camera Access Error."); }
+    }
+
+    // UPDATED: TWO-STEP VALIDATION
+    document.getElementById('unlock-camera').onclick = () => {
+        const idVal = document.getElementById('job-id-input').value.trim();
+        const pinVal = document.getElementById('pin-verification').value;
+
+        if (!idVal) {
+            alert("Please enter a SiteVerify Job ID first.");
+            return;
+        }
+
+        if (pinVal !== sessionPIN) {
+            alert("Security PIN is incorrect. Please check the red box.");
+            return;
+        }
+
+        activeJobID = idVal;
+        sessionUnix = Date.now();
+        const now = new Date();
+        sessionDate = now.toLocaleDateString('en-GB');
+        sessionTime = now.toLocaleTimeString('en-GB');
+        
+        masterAuditBody = `SiteVerify Job ID: ${activeJobID}\n` +
+                          `Name: ${localStorage.getItem('sv_username') || 'N/A'}\n` +
+                          `Phone number: ${localStorage.getItem('sv_userphone') || 'N/A'}\n` +
+                          `PIN: ${sessionPIN}\n` +
+                          `Date: ${sessionDate}\n` +
+                          `Time: ${sessionTime}\n` +
+                          `Unix Timestamp: ${sessionUnix}\n` +
+                          `Latitude: ${sessionLat}\n` +
+                          `Longitude: ${sessionLon}`;
+        
+        showScreen('camera-screen');
+        startCamera("environment");
+    };
+
+    document.getElementById('shutter').onclick = () => {
+        const video = document.getElementById('video-feed');
+        const canvas = document.getElementById('capture-canvas');
+        const mode = stream.getVideoTracks()[0].getSettings().facingMode;
+        const ctx = canvas.getContext('2d');
+
+        if (mode !== 'user') {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            startCamera("user");
+        } else {
+            // COMPOSITE RENDERING
+            ctx.putImageData(rearPhotoData, 0, 0); 
+            const sSize = Math.floor(canvas.width * 0.22);
+            ctx.drawImage(video, 20, canvas.height - sSize - 20, sSize, sSize);
+            
+            const qrTemp = document.getElementById('qrcode-temp');
+            qrTemp.innerHTML = "";
+            const qrSize = Math.floor(canvas.width * 0.18);
+            
+            // Render QR, then Draw, then Show Image
+            new QRCode(qrTemp, { 
+                text: masterAuditBody, 
+                width: qrSize, 
+                height: qrSize, 
+                correctLevel: QRCode.CorrectLevel.L 
+            });
+
+            const renderTimer = setInterval(() => {
+                const qrImg = qrTemp.querySelector('img');
+                if (qrImg && qrImg.complete) {
+                    clearInterval(renderTimer);
+                    ctx.drawImage(qrImg, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
+                    document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+                    stream.getTracks().forEach(t => t.stop());
+                    document.getElementById('review-overlay').style.display = 'flex';
+                    document.getElementById('camera-controls').style.display = 'none';
+                }
+            }, 50);
+        }
+    };
+
+    document.getElementById('save-to-device').onclick = () => {
+        const link = document.createElement('a');
+        link.download = `SiteVerify_${activeJobID}_${sessionUnix}.jpg`;
+        link.href = document.getElementById('final-document').src;
+        link.click();
+        document.getElementById('save-controls').style.display = 'none';
+        document.getElementById('share-controls').style.display = 'flex';
+    };
+
+    document.getElementById('share-whatsapp').onclick = () => {
+        window.open(`https://wa.me/${(localStorage.getItem('sv_recphone')||'').replace(/\+/g,'')}?text=${encodeURIComponent(masterAuditBody)}`);
+    };
+
+    document.getElementById('share-gmail').onclick = () => {
+        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=Audit: ${activeJobID}&body=${encodeURIComponent(masterAuditBody)}`;
+    };
+
+    document.getElementById('discard-btn').onclick = () => location.reload();
+    document.getElementById('final-back').onclick = () => location.reload();
+});
