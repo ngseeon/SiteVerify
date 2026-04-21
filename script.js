@@ -1,21 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements
     const pinDisplay = document.getElementById('pin-display');
     const locDisplay = document.getElementById('location-display');
     const clockDisplay = document.getElementById('live-clock');
     
-    // Live Background GPS Variables
-    let liveLat = 0, liveLon = 0;
-    let liveTown = "Detecting...";
+    let liveLat = 0, liveLon = 0, liveTown = "Detecting...";
+    let sessionLat = 0, sessionLon = 0, sessionPIN = "", sessionUnix = 0, sessionDate = "", sessionTime = "";
+    let masterAuditBody = ""; 
 
-    // THE AUDIT SNAPSHOT (LOCKED FOR THE SESSION)
-    let sessionLat = 0;
-    let sessionLon = 0;
-    let sessionPIN = "";
-    
-    let stream = null;
-    let rearPhotoData = null;
-    let activeJobID = "";
+    let stream = null, rearPhotoData = null, activeJobID = "";
 
     function calculatePIN(lat, lon) {
         const latDec = lat.toString().split('.')[1] || "0";
@@ -29,26 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
     };
 
-    // TRIGGER SNAPSHOT ON MENU BUTTON CLICK
     document.getElementById('nav-capture').onclick = () => {
-        if (liveLat === 0) {
-            alert("Waiting for GPS lock. Please try again in a few seconds.");
-            return;
-        }
-        // Take the absolute snapshot for the audit trail
-        sessionLat = liveLat;
-        sessionLon = liveLon;
+        if (liveLat === 0) { alert("GPS Pending. Please wait."); return; }
+        sessionLat = liveLat; sessionLon = liveLon;
         sessionPIN = calculatePIN(sessionLat, sessionLon);
-        
         pinDisplay.innerText = `Security PIN: ${sessionPIN}`;
         showScreen('input-screen');
     };
 
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('cancel-input').onclick = () => {
-        sessionPIN = ""; // Clear snapshot on cancel
-        showScreen('menu-screen');
-    };
+    document.getElementById('cancel-input').onclick = () => showScreen('menu-screen');
     document.getElementById('cam-back').onclick = () => location.reload();
 
     const loadSettings = () => {
@@ -66,20 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('menu-screen');
     };
 
-    // BACKGROUND GPS WATCHER
     function initGPS() {
         if (!navigator.geolocation) return;
         navigator.geolocation.watchPosition(async (p) => {
-            liveLat = p.coords.latitude;
-            liveLon = p.coords.longitude;
+            liveLat = p.coords.latitude; liveLon = p.coords.longitude;
             document.getElementById('gps-status').innerText = "GPS: ON";
-            
             try {
                 const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${liveLat}&lon=${liveLon}`);
                 const data = await res.json();
-                liveTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Gelang Patah";
+                liveTown = data.address.neighbourhood || data.address.suburb || data.address.town || data.address.city || "Site Location";
                 locDisplay.innerText = `🌐 ${liveTown}`;
-            } catch (e) { locDisplay.innerText = `🌐 ${liveTown}`; }
+            } catch (e) { locDisplay.innerText = "🌐 Iskandar Puteri"; }
         }, null, { enableHighAccuracy: true });
     }
     initGPS();
@@ -92,24 +71,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if(stream) stream.getTracks().forEach(t => t.stop());
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
+                video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
             });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Access Required."); }
+        } catch (err) { alert("Camera Access Error."); }
     }
 
     document.getElementById('unlock-camera').onclick = () => {
         const idVal = document.getElementById('job-id-input').value.trim();
         const pinVal = document.getElementById('pin-verification').value;
-        
-        // Strictly compare typed PIN with the Snapshot PIN
         if (idVal && pinVal === sessionPIN) {
             activeJobID = idVal;
+            sessionUnix = Date.now();
+            const now = new Date();
+            sessionDate = now.toLocaleDateString('en-GB');
+            sessionTime = now.toLocaleTimeString('en-GB');
+            
+            // CONSTRUCT UNIFIED MASTER AUDIT STRING
+            masterAuditBody = `SiteVerify Job ID: ${activeJobID}\n` +
+                              `Name: ${localStorage.getItem('sv_username') || 'N/A'}\n` +
+                              `Phone number: ${localStorage.getItem('sv_userphone') || 'N/A'}\n` +
+                              `PIN: ${sessionPIN}\n` +
+                              `Date: ${sessionDate}\n` +
+                              `Time: ${sessionTime}\n` +
+                              `Unix Timestamp: ${sessionUnix}\n` +
+                              `Latitude: ${sessionLat}\n` +
+                              `Longitude: ${sessionLon}`;
+            
             showScreen('camera-screen');
             startCamera("environment");
-        } else {
-            alert("Verification Failed. PIN must match exactly.");
-        }
+        } else { alert("Verification Failed."); }
     };
 
     document.getElementById('shutter').onclick = () => {
@@ -117,40 +108,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('capture-canvas');
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
         const ctx = canvas.getContext('2d');
-        canvas.width = 1280; canvas.height = 720;
 
         if (mode !== 'user') {
-            ctx.drawImage(video, 0, 0, 1280, 720);
-            rearPhotoData = ctx.getImageData(0, 0, 1280, 720);
+            // LOCK RATIO TO CAMERA NATURAL SIZE
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // Composite Image
+            // BAKE FINAL DOCUMENT
             ctx.putImageData(rearPhotoData, 0, 0); 
-            ctx.lineWidth = 6; ctx.strokeStyle = "white";
-            ctx.strokeRect(40, 440, 260, 260);
-            ctx.drawImage(video, 40, 440, 260, 260);
-            
-            // Metadata uses SESSION SNAPSHOT for 100% Audit Consistency
-            const meta = `SiteVerify\nJob: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nUser: ${localStorage.getItem('sv_username')}\nLoc: ${liveTown}\nGPS: ${sessionLat},${sessionLon}`;
+            const sSize = Math.floor(canvas.width * 0.22);
+            ctx.lineWidth = 5; ctx.strokeStyle = "white";
+            ctx.strokeRect(20, canvas.height - sSize - 20, sSize, sSize);
+            ctx.drawImage(video, 20, canvas.height - sSize - 20, sSize, sSize);
             
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
-            new QRCode(qrTemp, { text: meta, width: 220, height: 220 });
+            const qrSize = Math.floor(canvas.width * 0.18);
+            new QRCode(qrTemp, { text: masterAuditBody, width: qrSize, height: qrSize, correctLevel: QRCode.CorrectLevel.L });
 
+            // Wait specifically for QR to render then finish canvas
             setTimeout(() => {
                 const qrImg = qrTemp.querySelector('img');
-                if (qrImg) ctx.drawImage(qrImg, 1020, 440, 220, 220);
-                document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.95);
+                if (qrImg) ctx.drawImage(qrImg, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
+                document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
                 stream.getTracks().forEach(t => t.stop());
                 document.getElementById('review-overlay').style.display = 'flex';
                 document.getElementById('camera-controls').style.display = 'none';
-            }, 600);
+            }, 300);
         }
     };
 
     document.getElementById('save-to-device').onclick = () => {
         const link = document.createElement('a');
-        link.download = `SiteVerify_${activeJobID}.jpg`;
+        link.download = `SiteVerify_${activeJobID}_${sessionUnix}.jpg`;
         link.href = document.getElementById('final-document').src;
         link.click();
         document.getElementById('save-controls').style.display = 'none';
@@ -158,13 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('share-whatsapp').onclick = () => {
-        const msg = encodeURIComponent(`SiteVerify Lock\nJob ID: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${sessionLat},${sessionLon}`);
-        window.open(`https://wa.me/${(localStorage.getItem('sv_recphone')||'').replace(/\+/g,'')}?text=${msg}`);
+        window.open(`https://wa.me/${(localStorage.getItem('sv_recphone')||'').replace(/\+/g,'')}?text=${encodeURIComponent(masterAuditBody)}`);
     };
 
     document.getElementById('share-gmail').onclick = () => {
-        const body = encodeURIComponent(`Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nTime: ${clockDisplay.innerText}\nGPS: ${sessionLat},${sessionLon}`);
-        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=SiteVerify: ${activeJobID}&body=${body}`;
+        window.location.href = `mailto:${localStorage.getItem('sv_recemail')}?subject=Audit: ${activeJobID}&body=${encodeURIComponent(masterAuditBody)}`;
     };
 
     document.getElementById('discard-btn').onclick = () => location.reload();
