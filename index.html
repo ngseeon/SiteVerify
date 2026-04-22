@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v27.4 - Frozen Capture</title>
+    <title>SiteVerify v27.5 - Clean Logic</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -11,7 +11,7 @@
     <header id="app-header">
         <div class="header-top">
             <span id="gps-status">GPS: PENDING</span>
-            <span id="settings-gear" style="cursor:pointer; font-size: 22px;">⚙</span>
+            <span id="settings-gear" class="clickable-icon">⚙</span>
         </div>
         <div class="logo-box">
             <img src="siteverify_logo.png" alt="Logo" class="app-logo">
@@ -24,10 +24,7 @@
     </header>
 
     <div id="loading-overlay" style="display:none;">
-        <div class="loader-box">
-            <div class="spinner"></div>
-            <p>Baking Audit Data & QR...</p>
-        </div>
+        <div class="spinner"></div>
     </div>
 
     <section id="menu-screen" class="app-screen">
@@ -38,8 +35,10 @@
     </section>
 
     <section id="input-screen" class="app-screen" style="display:none">
-        <div class="settings-container">
-            <h2 style="text-align:center;">SiteVerify Initialization</h2>
+        <div class="initialization-container">
+            <h2 class="title-initial">SiteVerify Initialization</h2>
+            <div class="spacing-block"></div> 
+            
             <div class="field-group">
                 <label>SiteVerify Job ID (Optional)</label>
                 <input type="text" id="job-id-input" placeholder="Defaults to 'Null'">
@@ -60,7 +59,7 @@
         <canvas id="capture-canvas" style="display:none;"></canvas>
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="ratio-lock"><img id="final-document" class="baked-img"></div>
-            <div id="save-controls" class="action-bar-bottom">
+            <div class="action-bar-bottom">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
