@@ -1,24 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loading-overlay');
-    const saveBtn = document.getElementById('save-to-device');
     let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null;
 
-    // Fixed Header: Settings Icon
+    // Header Amendment: System Settings icon
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
     document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
 
-    // Fixed Header: Location Name
+    // Header Amendment: Location Name
     navigator.geolocation.watchPosition(async (p) => {
         liveLat = p.coords.latitude; liveLon = p.coords.longitude;
         document.getElementById('gps-status').innerText = "GPS: ON";
         try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${liveLat}&lon=${liveLon}&format=json`);
             const data = await res.json();
-            const loc = data.address.suburb || data.address.city || "Site Located";
+            const loc = data.address.suburb || data.address.city || data.address.road || "Site Located";
             document.getElementById('location-display').innerText = `🌐 ${loc}`;
         } catch {
-            document.getElementById('location-display').innerText = `📍 ${liveLat.toFixed(3)}, ${liveLon.toFixed(3)}`;
+            document.getElementById('location-display').innerText = `📍 ${liveLat.toFixed(4)}, ${liveLon.toFixed(4)}`;
         }
     }, null, { enableHighAccuracy: true });
 
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
-        document.getElementById('app-header').style.display = (id === 'camera-screen' || id === 'settings-screen') ? 'none' : 'block';
+        document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
     };
 
     document.getElementById('nav-capture').onclick = () => {
@@ -40,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('unlock-camera').onclick = () => {
         let val = document.getElementById('job-id-input').value.trim();
-        activeJobID = (val === "") ? "Null" : val; // RULE 1
+        activeJobID = (val === "") ? "Null" : val; 
         if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Incorrect PIN"); return; }
         showScreen('camera-screen');
         startCamera("environment");
@@ -48,7 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: 1920, height: 1080 } });
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
+        });
         document.getElementById('video-feed').srcObject = stream;
     }
 
@@ -64,20 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // FREEZE IMMEDIATELY
-            loader.style.display = 'flex';
-            ctx.putImageData(rearPhotoData, 0, 0);
+            loader.style.display = 'block'; 
+            ctx.putImageData(rearPhotoData, 0, 0); 
             
             const sWidth = canvas.width * 0.25;
             const sRatio = video.videoWidth / video.videoHeight;
             const sHeight = sWidth / sRatio;
             ctx.drawImage(video, 20, canvas.height - sHeight - 20, sWidth, sHeight);
             
-            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.5);
-            document.getElementById('review-overlay').style.display = 'flex';
-            stream.getTracks().forEach(t => t.stop());
+            stream.getTracks().forEach(t => t.stop()); 
 
-            // PROMISE-BASED QR (Kill the loop)
             const qrBox = document.getElementById('qrcode-temp');
             qrBox.innerHTML = "";
             const qrSize = Math.floor(canvas.width * 0.18);
@@ -89,22 +86,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = qrBox.querySelector('img');
                 ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
                 document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
-                saveBtn.innerText = "Save to Device";
-                saveBtn.disabled = false;
+                document.getElementById('review-overlay').style.display = 'flex';
                 loader.style.display = 'none';
-            }, 800); // Fixed 800ms bake time
+            }, 800); 
         }
     };
 
-    saveBtn.onclick = () => {
+    document.getElementById('save-to-device').onclick = () => {
         const a = document.createElement('a');
         a.href = document.getElementById('final-document').src;
         a.download = `SiteVerify_${activeJobID}.jpg`;
         a.click();
         
-        // Gmail Subject Update [No "Audit"]
-        const subject = `SiteVerify Job ID: ${activeJobID}`;
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=Data attached.`;
+        // Gmail: Terminology Scrub
+        window.location.href = `mailto:?subject=SiteVerify Job ID: ${activeJobID}&body=Attached verified data.`;
     };
 
     document.getElementById('discard-btn').onclick = () => location.reload();
