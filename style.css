@@ -1,3 +1,4 @@
+/* Previous styles maintained */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #fff; }
 
@@ -7,6 +8,12 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
 .header-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; font-family: monospace; }
 .header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
+
+/* NEW: Loading Overlay */
+#loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 5000; display: flex; justify-content: center; align-items: center; }
+.loader-box { text-align: center; color: #fff; }
+.spinner { width: 40px; height: 40px; border: 4px solid #fff; border-top: 4px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; display: none; background: #fff; overflow-y: auto; }
 #menu-screen { display: block; }
@@ -26,7 +33,6 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .field-group label { font-size: 11px; font-weight: bold; color: #666; text-transform: uppercase; margin-bottom: 4px; display: block; }
 .field-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 10px; font-size: 16px; }
 
-/* REVISED: Top alignment, no white border */
 .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; flex-direction: column; align-items: center; justify-content: flex-start; z-index: 3000; padding-top: 10px; }
 .ratio-lock { width: 100%; display: flex; justify-content: center; }
 .baked-img { width: 100%; height: auto; max-height: 75vh; object-fit: contain; }
