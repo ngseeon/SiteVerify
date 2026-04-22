@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v27.5 - Clean Logic</title>
+    <title>SiteVerify v27.6 - Final Logic</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -25,6 +25,7 @@
 
     <div id="loading-overlay" style="display:none;">
         <div class="spinner"></div>
+        <p id="loading-text">Processing Site Data...</p>
     </div>
 
     <section id="menu-screen" class="app-screen">
@@ -34,11 +35,22 @@
         </div>
     </section>
 
+    <section id="settings-screen" class="app-screen" style="display:none">
+        <div class="settings-container">
+            <h2>System Settings</h2>
+            <div class="field-group"><label>User Name</label><input type="text" id="set-name"></div>
+            <div class="field-group"><label>User Email</label><input type="email" id="set-email"></div>
+            <div class="field-group"><label>Handphone No.</label><input type="tel" id="set-phone"></div>
+            <div class="field-group"><label>Recipient Email</label><input type="email" id="set-rec-email"></div>
+            <div class="field-group"><label>WhatsApp Phone</label><input type="tel" id="set-wa"></div>
+            <button id="save-settings" class="btn-red-wide">Save & Close</button>
+        </div>
+    </section>
+
     <section id="input-screen" class="app-screen" style="display:none">
         <div class="initialization-container">
             <h2 class="title-initial">SiteVerify Initialization</h2>
             <div class="spacing-block"></div> 
-            
             <div class="field-group">
                 <label>SiteVerify Job ID (Optional)</label>
                 <input type="text" id="job-id-input" placeholder="Defaults to 'Null'">
@@ -59,8 +71,8 @@
         <canvas id="capture-canvas" style="display:none;"></canvas>
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="ratio-lock"><img id="final-document" class="baked-img"></div>
-            <div class="action-bar-bottom">
-                <button id="save-to-device" class="btn-red">Save to Device</button>
+            <div class="action-bar-bottom-static">
+                <button id="save-to-device" class="btn-red" disabled>Baking...</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
