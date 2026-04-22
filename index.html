@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v27.0 - Auto-ID & Pro Layout</title>
+    <title>SiteVerify v27.2 - Secure Audit</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -23,6 +23,13 @@
         </div>
         <hr class="header-line">
     </header>
+
+    <div id="loading-overlay" style="display:none;">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <p>Generating Secure QR Audit...</p>
+        </div>
+    </div>
 
     <section id="menu-screen" class="app-screen">
         <div class="action-bar-bottom">
