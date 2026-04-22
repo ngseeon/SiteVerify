@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('nav-capture').onclick = () => {
-        if (liveLat === 0) { alert("GPS Lock Pending..."); return; }
+        if (liveLat === 0) { alert("Waiting for GPS lock..."); return; }
         sessionLat = liveLat; sessionLon = liveLon;
         sessionPIN = calculatePIN(sessionLat, sessionLon);
         pinDisplay.innerText = `Security PIN: ${sessionPIN}`;
@@ -74,21 +74,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
             });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Access Error."); }
+        } catch (err) { alert("Camera Error."); }
     }
 
-    // UPDATED: TWO-STEP VALIDATION
     document.getElementById('unlock-camera').onclick = () => {
-        const idVal = document.getElementById('job-id-input').value.trim();
+        // Auto-fill "Null" if empty
+        let idVal = document.getElementById('job-id-input').value.trim();
+        if (!idVal) idVal = "Null";
+        
         const pinVal = document.getElementById('pin-verification').value;
 
-        if (!idVal) {
-            alert("Please enter a SiteVerify Job ID first.");
-            return;
-        }
-
         if (pinVal !== sessionPIN) {
-            alert("Security PIN is incorrect. Please check the red box.");
+            alert("Security PIN is incorrect.");
             return;
         }
 
@@ -125,16 +122,17 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // COMPOSITE RENDERING
+            // RENDER FINAL AUDIT IMAGE
             ctx.putImageData(rearPhotoData, 0, 0); 
-            const sSize = Math.floor(canvas.width * 0.22);
+            
+            // Fixed Square Selfie Ratio (1:1)
+            const sSize = Math.floor(canvas.width * 0.25); 
             ctx.drawImage(video, 20, canvas.height - sSize - 20, sSize, sSize);
             
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
             const qrSize = Math.floor(canvas.width * 0.18);
             
-            // Render QR, then Draw, then Show Image
             new QRCode(qrTemp, { 
                 text: masterAuditBody, 
                 width: qrSize, 
@@ -142,6 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 correctLevel: QRCode.CorrectLevel.L 
             });
 
+            // Ensure QR is baked before showing
             const renderTimer = setInterval(() => {
                 const qrImg = qrTemp.querySelector('img');
                 if (qrImg && qrImg.complete) {
