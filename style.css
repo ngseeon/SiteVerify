@@ -2,38 +2,27 @@
 body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #fff; }
 
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px 15px; border-bottom: 1px solid #ddd; }
-.header-top { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: bold; font-family: monospace; height: 25px; }
 .logo-box { width: 100%; height: 60px; display: flex; justify-content: center; margin: 5px 0; }
 .app-logo { max-width: 180px; max-height: 100%; object-fit: contain; }
-.header-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; font-family: monospace; }
 .header-line { border: 0; border-top: 3px solid #737373; margin-top: 5px; }
-.clickable-icon { cursor: pointer; font-size: 24px; padding: 5px; }
 
-/* Fixed Layout Spacing */
-.initialization-container { padding: 20px; text-align: center; }
-.title-initial { font-size: 26px; font-weight: 800; color: #000; }
-.spacing-block { height: 35px; } /* Added space below title */
-
-/* Transparent Overlay logic */
-#loading-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6000; pointer-events: none; }
-.spinner { width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.3); border-top: 6px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
+#loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 6000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff; text-shadow: 1px 1px 2px #000; }
+.spinner { width: 50px; height: 50px; border: 5px solid #fff; border-top: 5px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; display: none; background: #fff; overflow-y: auto; }
-#menu-screen { display: block; }
-.full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; overflow: hidden; }
-.camera-wrap { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
-#video-feed { width: 100%; height: 100%; object-fit: cover; }
+.full-view { top: 0 !important; height: 100vh; background: #000; z-index: 1500; }
 
-.pin-box-inline { background: #fff; padding: 15px; font-size: 24px; font-weight: bold; border-radius: 10px; border: 3px solid #ff0000; color: #ff0000; margin-bottom: 10px; }
-.action-bar-bottom { position: fixed; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 10px; z-index: 2000; }
-.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 15px; }
-.btn-red-wide { width: 100%; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 10px; }
-.btn-grey-wide { width: 100%; height: 50px; background: #666; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 15px; margin-top: 10px; }
+/* Fixed scaling to prevent button overlap */
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; z-index: 3000; }
+.ratio-lock { flex: 1; display: flex; align-items: center; justify-content: center; padding-bottom: 100px; }
+.baked-img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
+.action-bar-bottom-static { position: absolute; bottom: 30px; width: 100%; display: flex; padding: 0 15px; gap: 10px; }
+.btn-red { flex: 1; height: 55px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; }
+.btn-red:disabled { background: #990000; color: #ccc; }
+
+.initialization-container { padding: 20px; text-align: center; }
+.spacing-block { height: 40px; } /* Improved spacing */
 .field-group { margin-bottom: 15px; text-align: left; }
-.field-group label { font-size: 11px; font-weight: bold; color: #666; display: block; margin-bottom: 4px; text-transform: uppercase; }
 .field-group input { width: 100%; padding: 14px; border: 1px solid #ccc; border-radius: 12px; font-size: 16px; }
-
-.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; align-items: center; z-index: 3000; }
-.baked-img { width: 100%; height: 100%; object-fit: contain; }
