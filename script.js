@@ -3,9 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "", masterAuditBody = "";
     let stream = null, rearPhotoData = null;
 
+    // Header Repairs: Settings icon
+    document.getElementById('settings-gear').onclick = () => {
+        alert("Settings Module: Standard 5-Field Layout Pending.");
+    };
+
+    // Location Tracking
     navigator.geolocation.watchPosition((p) => {
         liveLat = p.coords.latitude; liveLon = p.coords.longitude;
         document.getElementById('gps-status').innerText = "GPS: ON";
+        // Simple placeholder for location name - integration with reverse geocoding
+        document.getElementById('location-display').innerText = `📍 ${liveLat.toFixed(4)}, ${liveLon.toFixed(4)}`;
     }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
@@ -26,12 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('unlock-camera').onclick = () => {
         let val = document.getElementById('job-id-input').value.trim();
-        activeJobID = (val === "") ? "Null" : val; // RULE 1: Null Assignment
+        activeJobID = (val === "") ? "Null" : val; // RULE 1 confirmed
         
-        const pinVal = document.getElementById('pin-verification').value;
-        if (pinVal !== sessionPIN) { alert("Incorrect PIN"); return; }
+        if (document.getElementById('pin-verification').value !== sessionPIN) { 
+            alert("Incorrect PIN"); return; 
+        }
 
-        masterAuditBody = `Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nLat: ${liveLat}\nLon: ${liveLon}\nTimestamp: ${Date.now()}`;
+        masterAuditBody = `ID: ${activeJobID}\nPIN: ${sessionPIN}\nLat: ${liveLat}\nLon: ${liveLon}\nVerified: ${Date.now()}`;
         showScreen('camera-screen');
         startCamera("environment");
     };
@@ -51,33 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
 
         if (mode !== 'user') {
-            // Step 1: Capture Rear Site Photo
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // Step 2: Capture Selfie & FREEZE
-            loader.style.display = 'flex'; // Show spinner immediately
-            
+            // STEP: Capture Selfie & FREEZE
+            loader.style.display = 'block'; // Transparent spinner only
             ctx.putImageData(rearPhotoData, 0, 0); 
             
-            // RULE 2: Natural Ratio Selfie (Prevent Squashing)
+            // Selfie Ratio Fix
             const sWidth = canvas.width * 0.25;
             const sRatio = video.videoWidth / video.videoHeight;
             const sHeight = sWidth / sRatio;
             ctx.drawImage(video, 20, canvas.height - sHeight - 20, sWidth, sHeight);
             
-            // FREEZE BACKGROUND: Update UI immediately while spinning
-            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.5);
+            // Show Frozen review immediately
+            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.6);
             document.getElementById('review-overlay').style.display = 'flex';
             document.getElementById('camera-controls').style.display = 'none';
             
-            // Kill Live Feed to show frozen image only
-            stream.getTracks().forEach(t => t.stop());
+            stream.getTracks().forEach(t => t.stop()); // Kill live feed
 
-            // RULE 3: Baking & QR Render
+            // STEP: QR Bake
             const qrBox = document.getElementById('qrcode-temp');
             qrBox.innerHTML = "";
             const qrSize = canvas.width * 0.18;
@@ -87,13 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = qrBox.querySelector('img');
                 if (img && img.complete && img.naturalWidth > 0) {
                     clearInterval(checkQR);
-                    // Draw finalized QR onto the canvas
                     ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
-                    // Update final source with baked QR
                     document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
-                    loader.style.display = 'none'; // Hide spinner once logic finishes
+                    loader.style.display = 'none'; // Process Complete
                 }
-            }, 100);
+            }, 50);
         }
     };
 
