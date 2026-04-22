@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pinDisplay = document.getElementById('pin-display');
     const locDisplay = document.getElementById('location-display');
     const clockDisplay = document.getElementById('live-clock');
+    const loader = document.getElementById('loading-overlay');
     
     let liveLat = 0, liveLon = 0, liveTown = "Detecting...";
     let sessionLat = 0, sessionLon = 0, sessionPIN = "", sessionUnix = 0, sessionDate = "", sessionTime = "";
@@ -78,16 +79,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('unlock-camera').onclick = () => {
-        // Auto-fill "Null" if empty
         let idVal = document.getElementById('job-id-input').value.trim();
-        if (!idVal) idVal = "Null";
+        if (!idVal) idVal = "Null"; // Fix: Auto-fill Null
         
         const pinVal = document.getElementById('pin-verification').value;
-
-        if (pinVal !== sessionPIN) {
-            alert("Security PIN is incorrect.");
-            return;
-        }
+        if (pinVal !== sessionPIN) { alert("Security PIN is incorrect."); return; }
 
         activeJobID = idVal;
         sessionUnix = Date.now();
@@ -122,32 +118,32 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // RENDER FINAL AUDIT IMAGE
+            // NEW: Show Loading message on selfie freeze
+            loader.style.display = 'flex';
+            
             ctx.putImageData(rearPhotoData, 0, 0); 
             
-            // Fixed Square Selfie Ratio (1:1)
-            const sSize = Math.floor(canvas.width * 0.25); 
-            ctx.drawImage(video, 20, canvas.height - sSize - 20, sSize, sSize);
+            // Fix: Natural Ratio Scaling
+            const selfieWidth = Math.floor(canvas.width * 0.25);
+            const selfieRatio = video.videoWidth / video.videoHeight;
+            const selfieHeight = selfieWidth / selfieRatio;
+            ctx.drawImage(video, 20, canvas.height - selfieHeight - 20, selfieWidth, selfieHeight);
             
+            // Fix: Ironclad QR Logic
             const qrTemp = document.getElementById('qrcode-temp');
             qrTemp.innerHTML = "";
             const qrSize = Math.floor(canvas.width * 0.18);
-            
-            new QRCode(qrTemp, { 
-                text: masterAuditBody, 
-                width: qrSize, 
-                height: qrSize, 
-                correctLevel: QRCode.CorrectLevel.L 
-            });
+            new QRCode(qrTemp, { text: masterAuditBody, width: qrSize, height: qrSize, correctLevel: QRCode.CorrectLevel.L });
 
-            // Ensure QR is baked before showing
-            const renderTimer = setInterval(() => {
+            const checker = setInterval(() => {
                 const qrImg = qrTemp.querySelector('img');
-                if (qrImg && qrImg.complete) {
-                    clearInterval(renderTimer);
+                if (qrImg && qrImg.complete && qrImg.naturalWidth > 0) {
+                    clearInterval(checker);
                     ctx.drawImage(qrImg, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
                     document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
                     stream.getTracks().forEach(t => t.stop());
+                    
+                    loader.style.display = 'none'; // Hide loading
                     document.getElementById('review-overlay').style.display = 'flex';
                     document.getElementById('camera-controls').style.display = 'none';
                 }
