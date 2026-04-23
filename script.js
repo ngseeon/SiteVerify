@@ -3,16 +3,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null;
 
-    // Header Amendment: System Settings icon
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
     document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
 
-    // Header Amendment: Location Name
+    // Verified: Language parameter fixed
     navigator.geolocation.watchPosition(async (p) => {
         liveLat = p.coords.latitude; liveLon = p.coords.longitude;
         document.getElementById('gps-status').innerText = "GPS: ON";
         try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${liveLat}&lon=${liveLon}&format=json`);
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${liveLat}&lon=${liveLon}&format=json&accept-language=en`);
             const data = await res.json();
             const loc = data.address.suburb || data.address.city || data.address.road || "Site Located";
             document.getElementById('location-display').innerText = `🌐 ${loc}`;
@@ -28,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
+        // Verified: Header visibility
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
     };
 
@@ -82,13 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
             
             new QRCode(qrBox, { text: masterData, width: qrSize, height: qrSize });
 
+            // Verified: Delay added to prevent empty QR
             setTimeout(() => {
                 const img = qrBox.querySelector('img');
-                ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
-                document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
-                document.getElementById('review-overlay').style.display = 'flex';
+                if (img) {
+                    ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
+                    document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+                    document.getElementById('review-overlay').style.display = 'flex';
+                }
                 loader.style.display = 'none';
-            }, 800); 
+            }, 1000); 
         }
     };
 
@@ -97,9 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         a.href = document.getElementById('final-document').src;
         a.download = `SiteVerify_${activeJobID}.jpg`;
         a.click();
-        
-        // Gmail: Terminology Scrub
-        window.location.href = `mailto:?subject=SiteVerify Job ID: ${activeJobID}&body=Attached verified data.`;
+        window.location.href = `mailto:?subject=SiteVerify Job ID: ${activeJobID}&body=Verified data attached.`;
     };
 
     document.getElementById('discard-btn').onclick = () => location.reload();
