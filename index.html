@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v25.4</title>
+    <title>SiteVerify v25.5</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -24,8 +24,6 @@
         </div>
         <hr class="header-divider">
     </header>
-
-    <div id="loading-overlay" style="display:none;"><div class="spinner"></div></div>
 
     <section id="menu-screen" class="app-screen">
         <div class="action-bar-bottom">
@@ -64,13 +62,19 @@
     <section id="camera-screen" class="app-screen camera-view" style="display:none">
         <video id="video-feed" autoplay playsinline></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
+        
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <img id="final-document" class="baked-img">
-            <div class="action-bar-bottom">
+            <div id="qr-loading-status" class="qr-status-msg">
+                Generating the QRCode
+                <div class="corner-spinner"></div>
+            </div>
+            <div class="action-bar-bottom" id="final-actions" style="display:none">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
+
         <div class="action-bar-bottom" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
