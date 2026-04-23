@@ -1,23 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loader = document.getElementById('loading-overlay');
-    let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
+    let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "", masterAuditBody = "";
     let stream = null, rearPhotoData = null;
 
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
-
-    // Verified: Language parameter fixed
-    navigator.geolocation.watchPosition(async (p) => {
+    navigator.geolocation.watchPosition((p) => {
         liveLat = p.coords.latitude; liveLon = p.coords.longitude;
         document.getElementById('gps-status').innerText = "GPS: ON";
-        try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${liveLat}&lon=${liveLon}&format=json&accept-language=en`);
-            const data = await res.json();
-            const loc = data.address.suburb || data.address.city || data.address.road || "Site Located";
-            document.getElementById('location-display').innerText = `🌐 ${loc}`;
-        } catch {
-            document.getElementById('location-display').innerText = `📍 ${liveLat.toFixed(4)}, ${liveLon.toFixed(4)}`;
-        }
     }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
@@ -27,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
-        // Verified: Header visibility
         document.getElementById('app-header').style.display = (id === 'camera-screen') ? 'none' : 'block';
     };
 
@@ -37,10 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('input-screen');
     };
 
+    // RULE 1: Immediate Null Assignment
     document.getElementById('unlock-camera').onclick = () => {
         let val = document.getElementById('job-id-input').value.trim();
-        activeJobID = (val === "") ? "Null" : val; 
-        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Incorrect PIN"); return; }
+        activeJobID = (val === "") ? "Null" : val;
+        
+        const pinVal = document.getElementById('pin-verification').value;
+        if (pinVal !== sessionPIN) { alert("Incorrect PIN"); return; }
+
+        masterAuditBody = `Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nLat: ${liveLat}\nLon: ${liveLon}\nDate: ${new Date().toLocaleString()}`;
         showScreen('camera-screen');
         startCamera("environment");
     };
@@ -60,38 +52,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
 
         if (mode !== 'user') {
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            loader.style.display = 'block'; 
+            loader.style.display = 'flex'; // LOADING MESSAGE
             ctx.putImageData(rearPhotoData, 0, 0); 
             
+            // RULE 2: Natural Ratio Scaling (No Squashing)
             const sWidth = canvas.width * 0.25;
             const sRatio = video.videoWidth / video.videoHeight;
             const sHeight = sWidth / sRatio;
             ctx.drawImage(video, 20, canvas.height - sHeight - 20, sWidth, sHeight);
             
-            stream.getTracks().forEach(t => t.stop()); 
-
+            // RULE 3: Verified QR Bake
             const qrBox = document.getElementById('qrcode-temp');
             qrBox.innerHTML = "";
-            const qrSize = Math.floor(canvas.width * 0.18);
-            const masterData = `SiteVerify Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nLoc: ${liveLat},${liveLon}`;
-            
-            new QRCode(qrBox, { text: masterData, width: qrSize, height: qrSize });
+            const qrSize = canvas.width * 0.18;
+            new QRCode(qrBox, { text: masterAuditBody, width: qrSize, height: qrSize });
 
-            // Verified: Delay added to prevent empty QR
-            setTimeout(() => {
+            const checkQR = setInterval(() => {
                 const img = qrBox.querySelector('img');
-                if (img) {
+                if (img && img.complete && img.naturalWidth > 0) {
+                    clearInterval(checkQR);
                     ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
                     document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+                    
+                    loader.style.display = 'none';
                     document.getElementById('review-overlay').style.display = 'flex';
+                    document.getElementById('camera-controls').style.display = 'none';
+                    stream.getTracks().forEach(t => t.stop());
                 }
-                loader.style.display = 'none';
-            }, 1000); 
+            }, 100);
         }
     };
 
@@ -100,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         a.href = document.getElementById('final-document').src;
         a.download = `SiteVerify_${activeJobID}.jpg`;
         a.click();
-        window.location.href = `mailto:?subject=SiteVerify Job ID: ${activeJobID}&body=Verified data attached.`;
     };
 
     document.getElementById('discard-btn').onclick = () => location.reload();
