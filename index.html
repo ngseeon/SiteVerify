@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v27.7 - Restored</title>
+    <title>SiteVerify v27.7</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -23,9 +23,7 @@
         <hr class="header-line">
     </header>
 
-    <div id="loading-overlay" style="display:none;">
-        <div class="spinner"></div>
-    </div>
+    <div id="loading-overlay" style="display:none;"><div class="spinner"></div></div>
 
     <section id="menu-screen" class="app-screen">
         <div class="action-bar-bottom">
@@ -43,20 +41,24 @@
             <div class="field-group"><label>Handphone No.</label><input type="tel" id="set-phone"></div>
             <div class="field-group"><label>Recipient Email</label><input type="email" id="set-rec-email"></div>
             <div class="field-group"><label>WhatsApp Phone</label><input type="tel" id="set-wa"></div>
-            <button id="save-settings" class="btn-red-wide">Save & Close</button>
+            <div class="action-bar-bottom">
+                <button id="save-settings" class="btn-red-wide">Save & Close</button>
+            </div>
         </div>
     </section>
 
     <section id="input-screen" class="app-screen" style="display:none">
         <div class="initialization-container">
             <h2 class="title-initial">SiteVerify Initialization</h2>
-            <div class="spacing-block-large"></div> <div class="field-group">
+            <div class="spacing-block-large"></div>
+            <div class="field-group">
                 <label>SiteVerify Job ID (Optional)</label>
                 <input type="text" id="job-id-input" placeholder="Defaults to 'Null'">
             </div>
+            <div id="pin-display" class="pin-box-inline">Security PIN: --</div>
             <div class="field-group">
-                <div id="pin-display" class="pin-box-inline">Security PIN: --</div>
-                <input type="number" id="pin-verification" placeholder="Enter Security PIN">
+                <label>Enter Security PIN</label>
+                <input type="number" id="pin-verification">
             </div>
             <button id="unlock-camera" class="btn-red-wide">Unlock Camera</button>
             <button id="cancel-input" class="btn-grey-wide">Cancel</button>
@@ -64,9 +66,7 @@
     </section>
 
     <section id="camera-screen" class="app-screen full-view" style="display:none">
-        <div class="camera-wrap">
-            <video id="video-feed" autoplay playsinline></video>
-        </div>
+        <div class="camera-wrap"><video id="video-feed" autoplay playsinline></video></div>
         <canvas id="capture-canvas" style="display:none;"></canvas>
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="ratio-lock"><img id="final-document" class="baked-img"></div>
