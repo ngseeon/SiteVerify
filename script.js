@@ -1,11 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const loader = document.getElementById('loading-overlay');
-    let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "", masterAuditBody = "";
+    let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null;
 
-    navigator.geolocation.watchPosition((p) => {
+    // NEW: Persistent Storage Sync
+    const fields = ['name', 'email', 'phone', 'rec-email', 'wa'];
+    const loadSettings = () => {
+        fields.forEach(f => {
+            document.getElementById(`set-${f}`).value = localStorage.getItem(`sv-${f}`) || '';
+        });
+    };
+    const saveSettings = () => {
+        fields.forEach(f => {
+            localStorage.setItem(`sv-${f}`, document.getElementById(`set-${f}`).value);
+        });
+        showScreen('menu-screen');
+    };
+
+    loadSettings();
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('save-settings').onclick = saveSettings;
+
+    // ANCHOR: Location with English Lock
+    navigator.geolocation.watchPosition(async (p) => {
         liveLat = p.coords.latitude; liveLon = p.coords.longitude;
         document.getElementById('gps-status').innerText = "GPS: ON";
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${liveLat}&lon=${liveLon}&format=json&accept-language=en`);
+            const data = await res.json();
+            document.getElementById('location-display').innerText = `🌐 ${data.address.suburb || data.address.city || "Site Located"}`;
+        } catch {
+            document.getElementById('location-display').innerText = `📍 ${liveLat.toFixed(4)}, ${liveLon.toFixed(4)}`;
+        }
     }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
@@ -24,15 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('input-screen');
     };
 
-    // RULE 1: Immediate Null Assignment
     document.getElementById('unlock-camera').onclick = () => {
-        let val = document.getElementById('job-id-input').value.trim();
-        activeJobID = (val === "") ? "Null" : val;
-        
-        const pinVal = document.getElementById('pin-verification').value;
-        if (pinVal !== sessionPIN) { alert("Incorrect PIN"); return; }
-
-        masterAuditBody = `Job ID: ${activeJobID}\nPIN: ${sessionPIN}\nLat: ${liveLat}\nLon: ${liveLon}\nDate: ${new Date().toLocaleString()}`;
+        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Incorrect PIN"); return; }
+        activeJobID = document.getElementById('job-id-input').value.trim() || "Null";
         showScreen('camera-screen');
         startCamera("environment");
     };
@@ -40,61 +59,39 @@ document.addEventListener('DOMContentLoaded', () => {
     async function startCamera(facing) {
         if(stream) stream.getTracks().forEach(t => t.stop());
         stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
+            video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
         });
         document.getElementById('video-feed').srcObject = stream;
     }
 
-    document.getElementById('shutter').onclick = () => {
+    // ANCHOR: v25.1 Stable Capture Sequence
+    document.getElementById('shutter').onclick = async () => {
         const video = document.getElementById('video-feed');
         const canvas = document.getElementById('capture-canvas');
         const ctx = canvas.getContext('2d');
         const mode = stream.getVideoTracks()[0].getSettings().facingMode;
 
         if (mode !== 'user') {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             ctx.drawImage(video, 0, 0);
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            loader.style.display = 'flex'; // LOADING MESSAGE
-            ctx.putImageData(rearPhotoData, 0, 0); 
+            document.getElementById('loading-overlay').style.display = 'block';
+            ctx.putImageData(rearPhotoData, 0, 0);
             
-            // RULE 2: Natural Ratio Scaling (No Squashing)
-            const sWidth = canvas.width * 0.25;
-            const sRatio = video.videoWidth / video.videoHeight;
-            const sHeight = sWidth / sRatio;
+            // Draw Selfie Overlay (v25.1 Math)
+            const sWidth = canvas.width * 0.3;
+            const sHeight = (video.videoHeight / video.videoWidth) * sWidth;
             ctx.drawImage(video, 20, canvas.height - sHeight - 20, sWidth, sHeight);
             
-            // RULE 3: Verified QR Bake
-            const qrBox = document.getElementById('qrcode-temp');
-            qrBox.innerHTML = "";
-            const qrSize = canvas.width * 0.18;
-            new QRCode(qrBox, { text: masterAuditBody, width: qrSize, height: qrSize });
-
-            const checkQR = setInterval(() => {
-                const img = qrBox.querySelector('img');
-                if (img && img.complete && img.naturalWidth > 0) {
-                    clearInterval(checkQR);
-                    ctx.drawImage(img, canvas.width - qrSize - 20, canvas.height - qrSize - 20, qrSize, qrSize);
-                    document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
-                    
-                    loader.style.display = 'none';
-                    document.getElementById('review-overlay').style.display = 'flex';
-                    document.getElementById('camera-controls').style.display = 'none';
-                    stream.getTracks().forEach(t => t.stop());
-                }
-            }, 100);
+            // Final Bake
+            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.8);
+            document.getElementById('review-overlay').style.display = 'flex';
+            document.getElementById('loading-overlay').style.display = 'none';
         }
     };
 
-    document.getElementById('save-to-device').onclick = () => {
-        const a = document.createElement('a');
-        a.href = document.getElementById('final-document').src;
-        a.download = `SiteVerify_${activeJobID}.jpg`;
-        a.click();
-    };
-
     document.getElementById('discard-btn').onclick = () => location.reload();
+    showScreen('menu-screen'); // Ensure menu shows on start
 });
