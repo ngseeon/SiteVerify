@@ -1,28 +1,38 @@
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #fff; }
 
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px; }
 .header-content { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
 .header-row-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: bold; }
-.logo-area { display: flex; align-items: center; justify-content: center; height: 50px; }
+.logo-area { display: flex; align-items: center; justify-content: center; height: 50px; gap: 10px; }
 .app-logo { max-height: 100%; object-fit: contain; }
+.v-num { font-size: 10px; color: #666; font-weight: bold; }
 .header-row-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; }
 .header-divider { border: 0; border-top: 1px solid #999; margin-top: 5px; }
 
-.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; padding: 20px; }
+.app-screen { position: absolute; top: 135px; bottom: 0; width: 100%; background: #fff; padding: 20px; overflow-y: auto; }
 .camera-view { top: 0 !important; height: 100vh; z-index: 1500; background: #000; padding: 0; }
 #video-feed { width: 100%; height: 100%; object-fit: cover; }
 
-.overlay-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; }
-.preview-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
-.contain-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+/* STATUS BAR BELOW IMAGE */
+.black-status-bar { width: 100%; background: #000; padding: 15px 20px; position: absolute; bottom: 110px; }
+.status-group { display: flex; align-items: center; gap: 15px; }
+.corner-spinner { width: 25px; height: 25px; border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.status-text-block { display: flex; flex-direction: column; }
+.gen-text { color: white; font-weight: bold; font-size: 14px; }
+.pulse-text { color: #ff4d4d; font-size: 10px; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; }
 
 .action-bar-bottom { position: fixed; bottom: 30px; width: 100%; left: 0; display: flex; padding: 0 20px; gap: 15px; z-index: 2000; }
-.btn-red { flex: 1; height: 65px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; }
+.btn-red { flex: 1; height: 60px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; }
+.btn-red-wide { width: 100%; height: 60px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; }
 
-.screen-title { font-size: 28px; margin-bottom: 20px; font-weight: bold; }
-.field { margin-bottom: 20px; }
-.field label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-.field input { width: 100%; padding: 16px; border: 2px solid #000; border-radius: 12px; font-size: 18px; }
-.pin-label { text-align: center; font-weight: bold; font-size: 18px; }
-.red-text { color: #ff0000; font-size: 22px; }
+.overlay-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; z-index: 3000; }
+.preview-container { width: 100%; flex-grow: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.baked-img { width: 100%; height: 100%; object-fit: contain; }
+.qr-overlay-element { position: absolute; bottom: 10px; right: 10px; width: 100px; height: 100px; background: white; padding: 5px; border-radius: 4px; display: none; }
+
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 11px; color: #666; font-weight: bold; margin-bottom: 4px; }
+.field input { width: 100%; padding: 12px; border: 2px solid #000; border-radius: 12px; font-size: 16px; }
