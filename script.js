@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let stream = null, rearPhotoData = null, frontPhotoData = null;
     let currentFacingMode = "environment";
 
-    // --- ANCHOR: Permanent Memory Logic ---
+    // --- LOCKED PERSISTENCE ---
     const settingsFields = ['set-name', 'set-email', 'set-phone', 'set-rec-email', 'set-wa'];
     const loadSettings = () => {
         settingsFields.forEach(id => {
@@ -12,9 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     const saveToMemory = () => {
-        settingsFields.forEach(id => {
-            localStorage.setItem(id, document.getElementById(id).value);
-        });
+        settingsFields.forEach(id => localStorage.setItem(id, document.getElementById(id).value));
     };
     loadSettings();
 
@@ -31,14 +29,11 @@ document.addEventListener('DOMContentLoaded', () => {
         stopCamera();
         currentFacingMode = facing;
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: facing, width: { ideal: 1280 } } 
-            });
+            stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } } });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Permission Error"); }
+        } catch (err) { alert("Camera Error"); }
     };
 
-    // Navigation
     document.getElementById('cam-back').onclick = () => {
         if (currentFacingMode === "user") startCamera("environment");
         else showScreen('menu-screen');
@@ -57,9 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startCamera("environment");
     };
 
-    // --- ANCHOR: Logic Flow Diagnostic ---
-    const updatePulse = (msg) => { document.getElementById('logic-pulse').innerText = `ID: ${msg}`; };
-
     document.getElementById('shutter').onclick = async () => {
         const video = document.getElementById('video-feed');
         const canvas = document.getElementById('capture-canvas');
@@ -71,37 +63,37 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            updatePulse("1_Selfie_Captured");
             document.getElementById('review-overlay').style.display = 'flex';
-            document.getElementById('qr-loading-status').style.display = 'block';
+            document.getElementById('qr-loading-status').style.display = 'flex';
             document.getElementById('final-actions').style.display = 'none';
 
+            // Immediate Preview Bake
             ctx.putImageData(rearPhotoData, 0, 0);
             const sW = canvas.width * 0.3;
             const sH = (video.videoHeight / video.videoWidth) * sW;
             ctx.drawImage(video, 20, canvas.height - sH - 20, sW, sH);
-            
             frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
-            updatePulse("2_Calling_QR_Engine");
+            // DATA PREPARATION & QR CALL
             const qrLive = document.getElementById('qrcode-live');
-            qrLive.innerHTML = "";
+            const dataString = `Job:${activeJobID}|PIN:${sessionPIN}|User:${document.getElementById('set-name').value}`;
+            document.getElementById('logic-pulse').innerText = `ID: 3 | Data: ${dataString}`;
             
-            new QRCode(qrLive, { text: `Job:${activeJobID}|PIN:${sessionPIN}`, width: 128, height: 128 });
+            qrLive.innerHTML = "";
+            new QRCode(qrLive, { text: dataString, width: 256, height: 256 });
 
+            // RENDER WATCHER
             const checkQR = setInterval(() => {
-                updatePulse("3_Waiting_For_Render");
                 const qrImg = qrLive.querySelector('img');
                 if (qrImg && qrImg.src && qrImg.complete) {
                     clearInterval(checkQR);
-                    updatePulse("4_Success_Clean_Up");
                     qrLive.style.display = "block";
                     document.getElementById('qr-loading-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
-            }, 1000);
+            }, 500);
         }
     };
 
@@ -110,7 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = canvas.getContext('2d');
         const qrImg = document.querySelector('#qrcode-live img');
         ctx.putImageData(frontPhotoData, 0, 0);
-        ctx.drawImage(qrImg, canvas.width - 150, canvas.height - 150, 130, 130);
+        if (qrImg) {
+            // High-Res Stamping
+            ctx.drawImage(qrImg, canvas.width - 220, canvas.height - 220, 200, 200);
+        }
         const link = document.createElement('a');
         link.download = `SiteVerify_${activeJobID}.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 1.0);
@@ -121,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
 
-    // GPS & Clock Persistence
     navigator.geolocation.watchPosition(pos => {
         document.getElementById('location-display').innerText = "🌐 Horizon Hills";
         document.getElementById('gps-status').innerText = "GPS: ON";
