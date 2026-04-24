@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v25.8 Master</title>
+    <title>SiteVerify v26.0 Master Build</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -18,7 +18,7 @@
                 <img src="siteverify_logo.png" alt="Logo" class="app-logo">
             </div>
             <div class="header-row-bottom">
-                <span id="location-display">🌐 Detecting...</span>
+                <span id="location-display">🌐 Horizon Hills</span>
                 <span id="live-clock">--/--/----, --:--:--</span>
             </div>
         </div>
@@ -69,10 +69,12 @@
                 <div id="qrcode-live" class="qr-overlay-element"></div>
             </div>
             
-            <div id="qr-loading-status" class="qr-status-msg">
-                Generating the QRCode
-                <div id="logic-pulse" style="font-size: 12px; color: #ff0000; margin-top: 10px;">ID: Init...</div>
-                <div class="corner-spinner"></div>
+            <div id="qr-loading-status" class="qr-status-footer">
+                <div class="spinner-container"><div class="corner-spinner"></div></div>
+                <div class="text-container">
+                    <div class="gen-text">Generating the QRCode</div>
+                    <div id="logic-pulse" class="pulse-text">ID: 3 | Data: PENDING</div>
+                </div>
             </div>
 
             <div class="action-bar-bottom" id="final-actions" style="display:none">
