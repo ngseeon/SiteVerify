@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v26.5</title>
+    <title>SiteVerify v26.6-Final</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -16,7 +16,7 @@
             </div>
             <div class="logo-area">
                 <img src="siteverify_logo.png" alt="Logo" class="app-logo">
-                <span class="v-num">v26.5</span>
+                <span class="v-num">v26.6</span>
             </div>
             <div class="header-row-bottom">
                 <span id="location-display">🌐 Horizon Hills</span>
@@ -55,26 +55,16 @@
     <section id="camera-screen" class="app-screen camera-view" style="display:none">
         <video id="video-feed" autoplay playsinline></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
-        
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="preview-wrap">
                 <img id="final-document" class="contain-img">
                 <div id="qrcode-cache" style="display:none"></div>
-                
-                <div id="qr-loading-status" class="floating-status">
-                    <div class="corner-spinner"></div>
-                    <div class="status-text-block">
-                        <div class="gen-text">Generating QRCode</div>
-                        <div class="pulse-text">ID: 3 | Syncing Bake</div>
-                    </div>
-                </div>
             </div>
             <div class="action-bar-bottom" id="final-actions" style="display:none">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
-
         <div class="action-bar-bottom" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
