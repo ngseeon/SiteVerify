@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v26.1</title>
+    <title>SiteVerify v26.1-LOCKED</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -20,7 +20,7 @@
             </div>
             <div class="header-row-bottom">
                 <span id="location-display">🌐 Horizon Hills</span>
-                <span id="live-clock">--/--/----, --:--:--</span>
+                <span id="live-clock">24/04/2026 16:01:59</span>
             </div>
         </div>
         <hr class="header-divider">
@@ -35,24 +35,24 @@
 
     <section id="settings-screen" class="app-screen" style="display:none">
         <div class="form-container">
-            <h2 class="section-title">System Settings</h2>
-            <div class="field"><label>User Name</label><input type="text" id="set-name"></div>
-            <div class="field"><label>User Email</label><input type="email" id="set-email"></div>
-            <div class="field"><label>Handphone No.</label><input type="tel" id="set-phone"></div>
-            <div class="field"><label>Recipient Email</label><input type="email" id="set-rec-email"></div>
-            <div class="field"><label>WhatsApp Phone</label><input type="tel" id="set-wa"></div>
+            <h1 class="screen-title">System Settings</h1>
+            <div class="field"><label>User Name</label><input type="text" id="set-user-name" value="NG See On"></div>
+            <div class="field"><label>User Email</label><input type="email" id="set-user-email" value="ngseeon@gmail.com"></div>
+            <div class="field"><label>Handphone No.</label><input type="tel" id="set-user-phone" value="+60127383923"></div>
+            <div class="field"><label>Recipient Email</label><input type="email" id="set-recipient-email" value="seeon.ng@gmail.com"></div>
+            <div class="field"><label>WhatsApp Phone</label><input type="tel" id="set-whatsapp" value="+60175783133"></div>
             <div class="action-bar-bottom">
-                <button id="save-settings" class="btn-red-wide">Save & Close</button>
+                <button id="save-settings" class="btn-red-full">Save & Close</button>
             </div>
         </div>
     </section>
 
     <section id="input-screen" class="app-screen" style="display:none">
         <div class="form-container">
-            <h2 class="section-title">SiteVerify Initialization</h2>
-            <div class="field"><label>Job ID (Optional)</label><input type="text" id="job-id-input" placeholder="Defaults to 'Null'"></div>
-            <div id="pin-display" class="pin-info">Security PIN: --</div>
-            <div class="field"><label>Enter PIN</label><input type="number" id="pin-verification"></div>
+            <h1 class="screen-title">Initialization</h1>
+            <div class="field"><label>JOB ID</label><input type="text" id="job-id-input" placeholder="NIL"></div>
+            <p class="pin-label">Security PIN: <span id="pin-display" class="red-text">00000000</span></p>
+            <div class="field"><label>ENTER PIN</label><input type="number" id="pin-verification"></div>
             <div class="action-bar-bottom">
                 <button id="unlock-camera" class="btn-red">Unlock Camera</button>
                 <button id="cancel-init" class="btn-red">Cancel</button>
@@ -63,29 +63,16 @@
     <section id="camera-screen" class="app-screen camera-view" style="display:none">
         <video id="video-feed" autoplay playsinline></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
-        
         <div id="review-overlay" class="overlay-screen" style="display:none">
-            <div class="preview-container">
-                <img id="final-document" class="baked-img">
-                <div id="qrcode-live" class="qr-overlay-element"></div>
+            <div class="preview-wrap">
+                <img id="final-document" class="contain-img">
+                <div id="qrcode-cache" style="display:none"></div>
             </div>
-            
-            <div class="black-status-bar">
-                <div id="qr-loading-status" class="status-group">
-                    <div class="corner-spinner"></div>
-                    <div class="status-text-block">
-                        <div class="gen-text">Generating the QRCode</div>
-                        <div id="logic-pulse" class="pulse-text">ID: 3 | Data: PENDING</div>
-                    </div>
-                </div>
-            </div>
-
             <div class="action-bar-bottom" id="final-actions" style="display:none">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
-
         <div class="action-bar-bottom" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
