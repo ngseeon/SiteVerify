@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null, frontPhotoData = null;
     let currentFacingMode = "environment";
+    let curLat = "0.00", curLng = "0.00";
 
     const settingsFields = ['set-name', 'set-email', 'set-phone', 'set-rec-email', 'set-wa'];
     const loadSettings = () => {
@@ -33,20 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { alert("Camera Error"); }
     };
 
-    document.getElementById('cam-back').onclick = () => {
-        if (currentFacingMode === "user") startCamera("environment");
-        else showScreen('menu-screen');
-    };
-
     document.getElementById('nav-capture').onclick = () => {
-        sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString();
+        sessionPIN = (Math.floor(Math.random() * 9000000) + 1000000).toString();
         document.getElementById('pin-display').innerText = `Security PIN: ${sessionPIN}`;
         showScreen('input-screen');
     };
 
     document.getElementById('unlock-camera').onclick = () => {
         if (document.getElementById('pin-verification').value !== sessionPIN) { alert("PIN Error"); return; }
-        activeJobID = document.getElementById('job-id-input').value.trim() || "Null";
+        activeJobID = document.getElementById('job-id-input').value.trim() || "NIL";
         showScreen('camera-screen');
         startCamera("environment");
     };
@@ -62,8 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            document.getElementById('review-overlay').style.display = 'flex';
-            document.getElementById('qr-loading-status').style.display = 'flex';
+            document.getElementById('review-overlay').style.display = 'block';
+            document.getElementById('floating-status').style.display = 'flex';
             document.getElementById('final-actions').style.display = 'none';
 
             ctx.putImageData(rearPhotoData, 0, 0);
@@ -73,21 +69,36 @@ document.addEventListener('DOMContentLoaded', () => {
             frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
+            // 9-LINE DATA LOGIC
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB');
+            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
+            const unixShort = Math.floor(Date.now() / 1000).toString(); // 10-digit
+            
+            const fullContent = [
+                `Job: ${activeJobID}`,
+                document.getElementById('set-name').value || "N/A",
+                document.getElementById('set-phone').value || "N/A",
+                sessionPIN,
+                dateStr,
+                timeStr,
+                unixShort,
+                `Lat ${curLat}`,
+                `Lng ${curLng}`
+            ].join('\n');
+
+            document.getElementById('logic-pulse').innerText = `ID: 3 | ${unixShort}`;
+            
             const qrLive = document.getElementById('qrcode-live');
-            const dataString = `Job:${activeJobID}|PIN:${sessionPIN}|ID:${document.getElementById('set-name').value}`;
-            
-            // ANCHOR: Diagnostic Visibility
-            document.getElementById('logic-pulse').innerText = `ID: 3 | Data: ${dataString}`;
-            
             qrLive.innerHTML = "";
-            new QRCode(qrLive, { text: dataString, width: 256, height: 256 });
+            new QRCode(qrLive, { text: fullContent, width: 256, height: 256 });
 
             const checkQR = setInterval(() => {
                 const qrImg = qrLive.querySelector('img');
                 if (qrImg && qrImg.src && qrImg.complete) {
                     clearInterval(checkQR);
                     qrLive.style.display = "block";
-                    document.getElementById('qr-loading-status').style.display = 'none';
+                    document.getElementById('floating-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
@@ -100,9 +111,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const ctx = canvas.getContext('2d');
         const qrImg = document.querySelector('#qrcode-live img');
         ctx.putImageData(frontPhotoData, 0, 0);
-        if (qrImg) ctx.drawImage(qrImg, canvas.width - 220, canvas.height - 220, 200, 200);
+        if (qrImg) ctx.drawImage(qrImg, canvas.width - 240, canvas.height - 240, 220, 220);
         const link = document.createElement('a');
-        link.download = `SiteVerify_${activeJobID}.jpg`;
+        link.download = `SV_${activeJobID}_${sessionPIN}.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 1.0);
         link.click();
     };
@@ -110,9 +121,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('save-settings').onclick = () => { saveToMemory(); showScreen('menu-screen'); };
     document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('cam-back').onclick = () => location.reload();
 
     navigator.geolocation.watchPosition(pos => {
-        document.getElementById('location-display').innerText = "🌐 Horizon Hills";
+        curLat = pos.coords.latitude.toFixed(7);
+        curLng = pos.coords.longitude.toFixed(7);
+        document.getElementById('location-display').innerText = `🌐 ${curLat}, ${curLng}`;
         document.getElementById('gps-status').innerText = "GPS: ON";
     }, null, { enableHighAccuracy: true });
 
