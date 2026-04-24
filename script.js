@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null, frontPhotoData = null;
     let currentFacingMode = "environment";
-    let curLat = "0.00", curLng = "0.00";
+    let curLat = "1.4193722", curLng = "103.591407";
 
     const settingsFields = ['set-name', 'set-email', 'set-phone', 'set-rec-email', 'set-wa'];
     const loadSettings = () => {
@@ -31,20 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } } });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Permission Error"); }
+        } catch (err) { alert("Camera Error"); }
     };
 
     document.getElementById('nav-capture').onclick = () => {
-        sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString().substring(0, 8);
+        sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString();
         document.getElementById('pin-display').innerText = sessionPIN;
         showScreen('input-screen');
     };
 
-    // ANCHOR: CANCEL BUTTON FIX
     document.getElementById('cancel-init').onclick = () => showScreen('menu-screen');
 
     document.getElementById('unlock-camera').onclick = () => {
-        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Invalid PIN"); return; }
+        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("PIN Error"); return; }
         activeJobID = document.getElementById('job-id-input').value.trim() || "NIL";
         showScreen('camera-screen');
         startCamera("environment");
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('review-overlay').style.display = 'block';
             document.getElementById('qr-loading-status').style.display = 'flex';
             
-            // ANCHOR: SUCCESSFUL IMAGE LAYERING
+            // RECALLED BAKING LOGIC
             ctx.putImageData(rearPhotoData, 0, 0);
             const sW = canvas.width * 0.3;
             const sH = (video.videoHeight / video.videoWidth) * sW;
@@ -72,13 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
             frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
-            // ANCHOR: 9-LINE CONTENT
             const now = new Date();
             const unixShort = Math.floor(Date.now() / 1000).toString();
             const fullContent = [
                 `Job: ${activeJobID}`,
-                document.getElementById('set-name').value || "N/A",
-                document.getElementById('set-phone').value || "N/A",
+                document.getElementById('set-name').value || "NG SEE ON",
+                document.getElementById('set-phone').value || "+60127383923",
                 sessionPIN,
                 now.toLocaleDateString('en-GB'),
                 now.toLocaleTimeString('en-GB', { hour12: false }),
@@ -124,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navigator.geolocation.watchPosition(pos => {
         curLat = pos.coords.latitude.toFixed(7);
         curLng = pos.coords.longitude.toFixed(7);
-        document.getElementById('location-display').innerText = `🌐 ${curLat}, ${curLng}`;
     }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
