@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
-    let stream = null, rearPhotoData = null;
-    let currentFacingMode = "environment"; // Tracks state to prevent nav-errors
+    let stream = null, rearPhotoData = null, frontPhotoData = null;
+    let currentFacingMode = "environment";
 
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
@@ -19,21 +19,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentFacingMode = facing;
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: facing, width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
             });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) {
-            alert("Camera Error: Please ensure permissions are granted.");
-        }
+        } catch (err) { alert("Camera Permission Required"); }
     };
 
-    // --- Hardened Navigation Routing ---
+    // ANCHOR: Navigation Logic
     document.getElementById('cam-back').onclick = () => {
-        if (currentFacingMode === "user") {
-            startCamera("environment"); // Forced forward to Main Capture
-        } else {
-            showScreen('menu-screen'); // Only return to menu from Rear mode
-        }
+        if (currentFacingMode === "user") startCamera("environment");
+        else showScreen('menu-screen');
     };
 
     document.getElementById('nav-capture').onclick = () => {
@@ -43,13 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('unlock-camera').onclick = () => {
-        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Invalid PIN"); return; }
+        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("PIN Error"); return; }
         activeJobID = document.getElementById('job-id-input').value.trim() || "Null";
         showScreen('camera-screen');
         startCamera("environment");
     };
 
-    // --- Capture & QR Logic ---
     document.getElementById('shutter').onclick = async () => {
         const video = document.getElementById('video-feed');
         const canvas = document.getElementById('capture-canvas');
@@ -61,49 +55,67 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // Initiate QR Generation Sequence
+            // STEP 1: IMMEDIATE PREVIEW (Main + Selfie)
             document.getElementById('review-overlay').style.display = 'flex';
             document.getElementById('qr-loading-status').style.display = 'block';
             document.getElementById('final-actions').style.display = 'none';
 
-            // Base Image Composition
             ctx.putImageData(rearPhotoData, 0, 0);
             const sW = canvas.width * 0.3;
             const sH = (video.videoHeight / video.videoWidth) * sW;
             ctx.drawImage(video, 20, canvas.height - sH - 20, sW, sH);
+            
+            // Store this composite state for the final bake
+            frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
-            // Create QR
-            const qrContainer = document.getElementById('qrcode-container');
-            qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: `JobID:${activeJobID}|PIN:${sessionPIN}`, width: 256, height: 256 });
+            // STEP 2: LIVE QR OVERLAY
+            const qrLive = document.getElementById('qrcode-live');
+            qrLive.innerHTML = "";
+            qrLive.style.display = "none";
+            
+            new QRCode(qrLive, { text: `Job:${activeJobID}|PIN:${sessionPIN}`, width: 128, height: 128 });
 
-            // Animated Delay for "Generating" State
-            setTimeout(() => {
-                const qrImg = qrContainer.querySelector('img');
-                if (qrImg) {
-                    ctx.drawImage(qrImg, canvas.width - 170, canvas.height - 170, 150, 150);
-                    document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
-                    
+            // STEP 3: COMPLETION WATCHER
+            const checkQR = setInterval(() => {
+                const qrImg = qrLive.querySelector('img');
+                if (qrImg && qrImg.src) {
+                    clearInterval(checkQR);
+                    qrLive.style.display = "block"; // Live element appears bottom-right
                     document.getElementById('qr-loading-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
-            }, 2000);
+            }, 500);
         }
     };
 
-    // UI Cleanup
-    document.getElementById('discard-btn').onclick = () => location.reload();
+    // FINAL BAKE ON SAVE
     document.getElementById('save-to-device').onclick = () => {
+        const canvas = document.getElementById('capture-canvas');
+        const ctx = canvas.getContext('2d');
+        const qrImg = document.querySelector('#qrcode-live img');
+
+        // Merge the live QR into the pixels
+        ctx.putImageData(frontPhotoData, 0, 0);
+        ctx.drawImage(qrImg, canvas.width - 150, canvas.height - 150, 130, 130);
+
         const link = document.createElement('a');
         link.download = `SiteVerify_${activeJobID}.jpg`;
-        link.href = document.getElementById('final-document').src;
+        link.href = canvas.toDataURL('image/jpeg', 1.0);
         link.click();
     };
 
-    // Header Persistence
+    document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
     document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
+    
+    // GPS & Clock
+    navigator.geolocation.watchPosition(pos => {
+        liveLat = pos.coords.latitude; liveLon = pos.coords.longitude;
+        document.getElementById('gps-status').innerText = "GPS: ON";
+    }, null, { enableHighAccuracy: true });
+
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB').replace(',', '');
     }, 1000);
