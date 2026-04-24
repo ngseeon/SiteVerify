@@ -31,17 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } } });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Error"); }
+        } catch (err) { alert("Camera Permission Error"); }
     };
 
     document.getElementById('nav-capture').onclick = () => {
-        sessionPIN = (Math.floor(Math.random() * 9000000) + 1000000).toString();
-        document.getElementById('pin-display').innerText = `Security PIN: ${sessionPIN}`;
+        sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString().substring(0, 8);
+        document.getElementById('pin-display').innerText = sessionPIN;
         showScreen('input-screen');
     };
 
+    // ANCHOR: CANCEL BUTTON FIX
+    document.getElementById('cancel-init').onclick = () => showScreen('menu-screen');
+
     document.getElementById('unlock-camera').onclick = () => {
-        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("PIN Error"); return; }
+        if (document.getElementById('pin-verification').value !== sessionPIN) { alert("Invalid PIN"); return; }
         activeJobID = document.getElementById('job-id-input').value.trim() || "NIL";
         showScreen('camera-screen');
         startCamera("environment");
@@ -59,9 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
             startCamera("user");
         } else {
             document.getElementById('review-overlay').style.display = 'block';
-            document.getElementById('floating-status').style.display = 'flex';
-            document.getElementById('final-actions').style.display = 'none';
-
+            document.getElementById('qr-loading-status').style.display = 'flex';
+            
+            // ANCHOR: SUCCESSFUL IMAGE LAYERING
             ctx.putImageData(rearPhotoData, 0, 0);
             const sW = canvas.width * 0.3;
             const sH = (video.videoHeight / video.videoWidth) * sW;
@@ -69,36 +72,31 @@ document.addEventListener('DOMContentLoaded', () => {
             frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
-            // 9-LINE DATA LOGIC
+            // ANCHOR: 9-LINE CONTENT
             const now = new Date();
-            const dateStr = now.toLocaleDateString('en-GB');
-            const timeStr = now.toLocaleTimeString('en-GB', { hour12: false });
-            const unixShort = Math.floor(Date.now() / 1000).toString(); // 10-digit
-            
+            const unixShort = Math.floor(Date.now() / 1000).toString();
             const fullContent = [
                 `Job: ${activeJobID}`,
                 document.getElementById('set-name').value || "N/A",
                 document.getElementById('set-phone').value || "N/A",
                 sessionPIN,
-                dateStr,
-                timeStr,
+                now.toLocaleDateString('en-GB'),
+                now.toLocaleTimeString('en-GB', { hour12: false }),
                 unixShort,
                 `Lat ${curLat}`,
                 `Lng ${curLng}`
             ].join('\n');
 
-            document.getElementById('logic-pulse').innerText = `ID: 3 | ${unixShort}`;
-            
             const qrLive = document.getElementById('qrcode-live');
             qrLive.innerHTML = "";
             new QRCode(qrLive, { text: fullContent, width: 256, height: 256 });
 
             const checkQR = setInterval(() => {
                 const qrImg = qrLive.querySelector('img');
-                if (qrImg && qrImg.src && qrImg.complete) {
+                if (qrImg && qrImg.complete) {
                     clearInterval(checkQR);
                     qrLive.style.display = "block";
-                    document.getElementById('floating-status').style.display = 'none';
+                    document.getElementById('qr-loading-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
@@ -127,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
         curLat = pos.coords.latitude.toFixed(7);
         curLng = pos.coords.longitude.toFixed(7);
         document.getElementById('location-display').innerText = `🌐 ${curLat}, ${curLng}`;
-        document.getElementById('gps-status').innerText = "GPS: ON";
     }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
