@@ -17,18 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } } });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (e) { console.error("Camera error"); }
+        } catch (e) { console.error("Cam fail"); }
     };
 
-    // UI Navigation
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
     document.getElementById('nav-capture').onclick = () => {
         sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString();
         document.getElementById('pin-display').innerText = sessionPIN;
         showScreen('input-screen');
     };
-    document.getElementById('cancel-init').onclick = () => showScreen('menu-screen');
 
     document.getElementById('unlock-camera').onclick = () => {
         if (document.getElementById('pin-verification').value !== sessionPIN) { alert("PIN Error"); return; }
@@ -48,32 +44,41 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
+            // STATE LOCK: Show processing UI
             document.getElementById('review-overlay').style.display = 'flex';
+            document.getElementById('process-tracker').style.display = 'flex';
+            document.getElementById('final-actions').style.display = 'none';
+
+            // Draw Selfie PIP immediately to give visual feedback
             ctx.putImageData(rearPhotoData, 0, 0);
-            
-            // Baking Anchor: Selfie PIP
             const pipW = canvas.width * 0.28;
             const pipH = (video.videoHeight / video.videoWidth) * pipW;
             ctx.drawImage(video, 30, canvas.height - pipH - 30, pipW, pipH);
+            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.7);
 
+            // Generate QR Data
             const qrContainer = document.getElementById('qrcode-cache');
             qrContainer.innerHTML = "";
             const qrData = [`Job: ${activeJobID}`, "NG SEE ON", "+60127383923", sessionPIN, new Date().toLocaleDateString('en-GB'), new Date().toLocaleTimeString('en-GB', {hour12:false}), Math.floor(Date.now()/1000), "Lat 1.4579", "Lng 103.6450"].join('\n');
             
             new QRCode(qrContainer, { text: qrData, width: 300, height: 300 });
 
+            // WAIT Logic for QR Render
             const checkQR = setInterval(() => {
                 const qrImg = qrContainer.querySelector('img');
                 if (qrImg && qrImg.complete) {
                     clearInterval(checkQR);
-                    // Baking Anchor: QR Position
+                    // Bake QR to Canvas
                     const qrSize = canvas.width * 0.22;
                     ctx.drawImage(qrImg, canvas.width - qrSize - 30, canvas.height - qrSize - 30, qrSize, qrSize);
+                    
+                    // Final Reveal
                     document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+                    document.getElementById('process-tracker').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
-            }, 500);
+            }, 800);
         }
     };
 
@@ -86,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('cam-back').onclick = () => location.reload();
+    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
+    document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
 
     setInterval(() => {
         const clock = document.getElementById('live-clock');
