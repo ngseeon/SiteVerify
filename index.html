@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v25.5</title>
+    <title>SiteVerify v25.6 Master</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -11,14 +11,14 @@
     <header id="app-header">
         <div class="header-content">
             <div class="header-row-top">
-                <span id="gps-status">GPS: PENDING</span>
+                <span id="gps-status">GPS: ON</span>
                 <span id="settings-gear" class="clickable-gear">⚙</span>
             </div>
             <div class="logo-area">
                 <img src="siteverify_logo.png" alt="Logo" class="app-logo">
             </div>
             <div class="header-row-bottom">
-                <span id="location-display">🌐 Detecting...</span>
+                <span id="location-display">🌐 Horizon Hills</span>
                 <span id="live-clock">--/--/----, --:--:--</span>
             </div>
         </div>
@@ -65,10 +65,12 @@
         
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <img id="final-document" class="baked-img">
-            <div id="qr-loading-status" class="qr-status-msg">
+            
+            <div id="qr-loading-status" class="qr-status-msg" style="display:none">
                 Generating the QRCode
                 <div class="corner-spinner"></div>
             </div>
+
             <div class="action-bar-bottom" id="final-actions" style="display:none">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
