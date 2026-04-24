@@ -1,11 +1,10 @@
-/* LOCKED v26 CORE STYLES */
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #fff; }
 
 #app-header { background: #f2f2f2; height: 135px; width: 100%; position: fixed; top: 0; z-index: 1000; padding: 10px; }
 .header-content { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
 .header-row-top { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: bold; }
-.logo-area { display: flex; align-items: center; justify-content: center; height: 50px; gap: 8px; }
+.logo-area { display: flex; align-items: center; justify-content: center; height: 50px; }
 .app-logo { max-height: 100%; object-fit: contain; }
 .header-row-bottom { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; }
 .header-divider { border: 0; border-top: 1px solid #999; margin-top: 5px; }
@@ -14,14 +13,9 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .camera-view { top: 0 !important; height: 100vh; z-index: 1500; background: #000; padding: 0; }
 #video-feed { width: 100%; height: 100%; object-fit: cover; }
 
-/* FIX: PREVENT OVERSIZED SCROLLING */
 .overlay-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; }
-.preview-wrap { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.preview-wrap { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; }
 .contain-img { max-width: 100%; max-height: 100%; object-fit: contain; }
-
-.floating-status { position: absolute; bottom: 120px; left: 20px; background: rgba(0,0,0,0.85); padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 10px; z-index: 4000; }
-.corner-spinner { width: 20px; height: 20px; border: 3px solid rgba(255,255,255,0.2); border-top: 3px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
 .action-bar-bottom { position: fixed; bottom: 30px; width: 100%; left: 0; display: flex; padding: 0 20px; gap: 15px; z-index: 2000; }
 .btn-red { flex: 1; height: 65px; background: #ff0000; color: #fff; border: none; border-radius: 50px; font-weight: bold; font-size: 18px; }
@@ -29,6 +23,6 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .screen-title { font-size: 28px; margin-bottom: 20px; font-weight: bold; }
 .field { margin-bottom: 20px; }
 .field label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-.field input { width: 100%; padding: 16px; border: 2px solid #000; border-radius: 12px; font-size: 18px; font-weight: bold; }
-.pin-label { text-align: center; font-weight: bold; font-size: 18px; margin: 10px 0; }
+.field input { width: 100%; padding: 16px; border: 2px solid #000; border-radius: 12px; font-size: 18px; }
+.pin-label { text-align: center; font-weight: bold; font-size: 18px; }
 .red-text { color: #ff0000; font-size: 22px; }
