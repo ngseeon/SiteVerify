@@ -41,9 +41,7 @@
             <div class="field"><label>Handphone No.</label><input type="tel" id="set-user-phone" value="+60127383923"></div>
             <div class="field"><label>Recipient Email</label><input type="email" id="set-recipient-email" value="seeon.ng@gmail.com"></div>
             <div class="field"><label>WhatsApp Phone</label><input type="tel" id="set-whatsapp" value="+60175783133"></div>
-            <div class="action-bar-bottom">
-                <button id="save-settings" class="btn-red-full">Save & Close</button>
-            </div>
+            <div class="action-bar-bottom"><button id="save-settings" class="btn-red-full">Save & Close</button></div>
         </div>
     </section>
 
@@ -63,9 +61,14 @@
     <section id="camera-screen" class="app-screen camera-view" style="display:none">
         <video id="video-feed" autoplay playsinline></video>
         <canvas id="capture-canvas" style="display:none;"></canvas>
+        
         <div id="review-overlay" class="overlay-screen" style="display:none">
             <div class="preview-wrap">
                 <img id="final-document" class="contain-img">
+                <div id="process-tracker" class="tracker-ui">
+                    <div class="spinner"></div>
+                    <span class="status-msg">Generating QRCode</span>
+                </div>
                 <div id="qrcode-cache" style="display:none"></div>
             </div>
             <div class="action-bar-bottom" id="final-actions" style="display:none">
@@ -73,6 +76,7 @@
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
+
         <div class="action-bar-bottom" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
