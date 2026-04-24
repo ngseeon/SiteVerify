@@ -1,7 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let liveLat = 0, liveLon = 0, sessionPIN = "", activeJobID = "";
+    let sessionPIN = "", activeJobID = "";
     let stream = null, rearPhotoData = null, frontPhotoData = null;
     let currentFacingMode = "environment";
+
+    // --- ANCHOR: Permanent Memory Logic ---
+    const settingsFields = ['set-name', 'set-email', 'set-phone', 'set-rec-email', 'set-wa'];
+    const loadSettings = () => {
+        settingsFields.forEach(id => {
+            const val = localStorage.getItem(id);
+            if (val) document.getElementById(id).value = val;
+        });
+    };
+    const saveToMemory = () => {
+        settingsFields.forEach(id => {
+            localStorage.setItem(id, document.getElementById(id).value);
+        });
+    };
+    loadSettings();
 
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
@@ -10,22 +25,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (id !== 'camera-screen') stopCamera();
     };
 
-    const stopCamera = () => {
-        if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-    };
+    const stopCamera = () => { if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } };
 
     const startCamera = async (facing) => {
         stopCamera();
         currentFacingMode = facing;
         try {
             stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } } 
+                video: { facingMode: facing, width: { ideal: 1280 } } 
             });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Permission Required"); }
+        } catch (err) { alert("Camera Permission Error"); }
     };
 
-    // ANCHOR: Navigation Logic
+    // Navigation
     document.getElementById('cam-back').onclick = () => {
         if (currentFacingMode === "user") startCamera("environment");
         else showScreen('menu-screen');
@@ -44,6 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         startCamera("environment");
     };
 
+    // --- ANCHOR: Logic Flow Diagnostic ---
+    const updatePulse = (msg) => { document.getElementById('logic-pulse').innerText = `ID: ${msg}`; };
+
     document.getElementById('shutter').onclick = async () => {
         const video = document.getElementById('video-feed');
         const canvas = document.getElementById('capture-canvas');
@@ -55,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            // STEP 1: IMMEDIATE PREVIEW (Main + Selfie)
+            updatePulse("1_Selfie_Captured");
             document.getElementById('review-overlay').style.display = 'flex';
             document.getElementById('qr-loading-status').style.display = 'block';
             document.getElementById('final-actions').style.display = 'none';
@@ -65,54 +81,49 @@ document.addEventListener('DOMContentLoaded', () => {
             const sH = (video.videoHeight / video.videoWidth) * sW;
             ctx.drawImage(video, 20, canvas.height - sH - 20, sW, sH);
             
-            // Store this composite state for the final bake
             frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
 
-            // STEP 2: LIVE QR OVERLAY
+            updatePulse("2_Calling_QR_Engine");
             const qrLive = document.getElementById('qrcode-live');
             qrLive.innerHTML = "";
-            qrLive.style.display = "none";
             
             new QRCode(qrLive, { text: `Job:${activeJobID}|PIN:${sessionPIN}`, width: 128, height: 128 });
 
-            // STEP 3: COMPLETION WATCHER
             const checkQR = setInterval(() => {
+                updatePulse("3_Waiting_For_Render");
                 const qrImg = qrLive.querySelector('img');
-                if (qrImg && qrImg.src) {
+                if (qrImg && qrImg.src && qrImg.complete) {
                     clearInterval(checkQR);
-                    qrLive.style.display = "block"; // Live element appears bottom-right
+                    updatePulse("4_Success_Clean_Up");
+                    qrLive.style.display = "block";
                     document.getElementById('qr-loading-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
                 }
-            }, 500);
+            }, 1000);
         }
     };
 
-    // FINAL BAKE ON SAVE
     document.getElementById('save-to-device').onclick = () => {
         const canvas = document.getElementById('capture-canvas');
         const ctx = canvas.getContext('2d');
         const qrImg = document.querySelector('#qrcode-live img');
-
-        // Merge the live QR into the pixels
         ctx.putImageData(frontPhotoData, 0, 0);
         ctx.drawImage(qrImg, canvas.width - 150, canvas.height - 150, 130, 130);
-
         const link = document.createElement('a');
         link.download = `SiteVerify_${activeJobID}.jpg`;
         link.href = canvas.toDataURL('image/jpeg', 1.0);
         link.click();
     };
 
+    document.getElementById('save-settings').onclick = () => { saveToMemory(); showScreen('menu-screen'); };
     document.getElementById('discard-btn').onclick = () => location.reload();
     document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
-    document.getElementById('save-settings').onclick = () => showScreen('menu-screen');
-    
-    // GPS & Clock
+
+    // GPS & Clock Persistence
     navigator.geolocation.watchPosition(pos => {
-        liveLat = pos.coords.latitude; liveLon = pos.coords.longitude;
+        document.getElementById('location-display').innerText = "🌐 Horizon Hills";
         document.getElementById('gps-status').innerText = "GPS: ON";
     }, null, { enableHighAccuracy: true });
 
