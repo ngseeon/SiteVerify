@@ -1,20 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let sessionPIN = "", activeJobID = "";
-    let stream = null, rearPhotoData = null, frontPhotoData = null;
+    let stream = null, rearPhotoData = null;
     let currentFacingMode = "environment";
-    let curLat = "1.4193722", curLng = "103.591407";
-
-    const settingsFields = ['set-name', 'set-email', 'set-phone', 'set-rec-email', 'set-wa'];
-    const loadSettings = () => {
-        settingsFields.forEach(id => {
-            const val = localStorage.getItem(id);
-            if (val) document.getElementById(id).value = val;
-        });
-    };
-    const saveToMemory = () => {
-        settingsFields.forEach(id => localStorage.setItem(id, document.getElementById(id).value));
-    };
-    loadSettings();
 
     const showScreen = (id) => {
         document.querySelectorAll('.app-screen').forEach(s => s.style.display = 'none');
@@ -31,9 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 } } });
             document.getElementById('video-feed').srcObject = stream;
-        } catch (err) { alert("Camera Error"); }
+        } catch (err) { console.error(err); }
     };
 
+    // LOCKED v26 INITIALIZATION LOGIC
     document.getElementById('nav-capture').onclick = () => {
         sessionPIN = (Math.floor(Math.random() * 90000000) + 10000000).toString();
         document.getElementById('pin-display').innerText = sessionPIN;
@@ -60,40 +48,36 @@ document.addEventListener('DOMContentLoaded', () => {
             rearPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             startCamera("user");
         } else {
-            document.getElementById('review-overlay').style.display = 'block';
+            // START BAKING FLOW
+            document.getElementById('review-overlay').style.display = 'flex';
             document.getElementById('qr-loading-status').style.display = 'flex';
             
-            // RECALLED BAKING LOGIC
+            // Step 1: Base Image (Rear)
             ctx.putImageData(rearPhotoData, 0, 0);
-            const sW = canvas.width * 0.3;
-            const sH = (video.videoHeight / video.videoWidth) * sW;
-            ctx.drawImage(video, 20, canvas.height - sH - 20, sW, sH);
-            frontPhotoData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Step 2: Overlay Selfie (PIP)
+            const pipW = canvas.width * 0.28;
+            const pipH = (video.videoHeight / video.videoWidth) * pipW;
+            ctx.drawImage(video, 30, canvas.height - pipH - 30, pipW, pipH);
+            
+            // Step 3: Generate QR
+            const qrContainer = document.getElementById('qrcode-cache');
+            qrContainer.innerHTML = "";
+            const qrData = [`Job: ${activeJobID}`, "NG SEE ON", "+60127383923", sessionPIN, new Date().toLocaleDateString('en-GB'), new Date().toLocaleTimeString('en-GB', {hour12:false}), Math.floor(Date.now()/1000), "Lat 1.4579", "Lng 103.6450"].join('\n');
+            
+            new QRCode(qrContainer, { text: qrData, width: 300, height: 300 });
 
-            const now = new Date();
-            const unixShort = Math.floor(Date.now() / 1000).toString();
-            const fullContent = [
-                `Job: ${activeJobID}`,
-                document.getElementById('set-name').value || "NG SEE ON",
-                document.getElementById('set-phone').value || "+60127383923",
-                sessionPIN,
-                now.toLocaleDateString('en-GB'),
-                now.toLocaleTimeString('en-GB', { hour12: false }),
-                unixShort,
-                `Lat ${curLat}`,
-                `Lng ${curLng}`
-            ].join('\n');
-
-            const qrLive = document.getElementById('qrcode-live');
-            qrLive.innerHTML = "";
-            new QRCode(qrLive, { text: fullContent, width: 256, height: 256 });
-
+            // Step 4: Sync & Render
             const checkQR = setInterval(() => {
-                const qrImg = qrLive.querySelector('img');
+                const qrImg = qrContainer.querySelector('img');
                 if (qrImg && qrImg.complete) {
                     clearInterval(checkQR);
-                    qrLive.style.display = "block";
+                    // Draw QR inside canvas bounds (Bottom Right)
+                    const qrSize = canvas.width * 0.22;
+                    ctx.drawImage(qrImg, canvas.width - qrSize - 30, canvas.height - qrSize - 30, qrSize, qrSize);
+                    
+                    // Finalize UI
+                    document.getElementById('final-document').src = canvas.toDataURL('image/jpeg', 0.95);
                     document.getElementById('qr-loading-status').style.display = 'none';
                     document.getElementById('final-actions').style.display = 'flex';
                     stopCamera();
@@ -103,26 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('save-to-device').onclick = () => {
-        const canvas = document.getElementById('capture-canvas');
-        const ctx = canvas.getContext('2d');
-        const qrImg = document.querySelector('#qrcode-live img');
-        ctx.putImageData(frontPhotoData, 0, 0);
-        if (qrImg) ctx.drawImage(qrImg, canvas.width - 240, canvas.height - 240, 220, 220);
         const link = document.createElement('a');
-        link.download = `SV_${activeJobID}_${sessionPIN}.jpg`;
-        link.href = canvas.toDataURL('image/jpeg', 1.0);
+        link.download = `SiteVerify_${activeJobID}.jpg`;
+        link.href = document.getElementById('final-document').src;
         link.click();
     };
 
-    document.getElementById('save-settings').onclick = () => { saveToMemory(); showScreen('menu-screen'); };
     document.getElementById('discard-btn').onclick = () => location.reload();
-    document.getElementById('settings-gear').onclick = () => showScreen('settings-screen');
     document.getElementById('cam-back').onclick = () => location.reload();
-
-    navigator.geolocation.watchPosition(pos => {
-        curLat = pos.coords.latitude.toFixed(7);
-        curLng = pos.coords.longitude.toFixed(7);
-    }, null, { enableHighAccuracy: true });
 
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleString('en-GB').replace(',', '');
