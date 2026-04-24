@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v25.6 Master</title>
+    <title>SiteVerify v25.7 Master</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -11,14 +11,14 @@
     <header id="app-header">
         <div class="header-content">
             <div class="header-row-top">
-                <span id="gps-status">GPS: ON</span>
+                <span id="gps-status">GPS: PENDING</span>
                 <span id="settings-gear" class="clickable-gear">⚙</span>
             </div>
             <div class="logo-area">
                 <img src="siteverify_logo.png" alt="Logo" class="app-logo">
             </div>
             <div class="header-row-bottom">
-                <span id="location-display">🌐 Horizon Hills</span>
+                <span id="location-display">🌐 Detecting Location...</span>
                 <span id="live-clock">--/--/----, --:--:--</span>
             </div>
         </div>
@@ -64,9 +64,12 @@
         <canvas id="capture-canvas" style="display:none;"></canvas>
         
         <div id="review-overlay" class="overlay-screen" style="display:none">
-            <img id="final-document" class="baked-img">
+            <div class="preview-container">
+                <img id="final-document" class="baked-img">
+                <div id="qrcode-live" class="qr-overlay-element"></div>
+            </div>
             
-            <div id="qr-loading-status" class="qr-status-msg" style="display:none">
+            <div id="qr-loading-status" class="qr-status-msg">
                 Generating the QRCode
                 <div class="corner-spinner"></div>
             </div>
@@ -83,7 +86,6 @@
         </div>
     </section>
 
-    <div id="qrcode-container" style="display:none;"></div>
     <script src="script.js"></script>
 </body>
 </html>
