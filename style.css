@@ -22,24 +22,14 @@ body { font-family: sans-serif; height: 100vh; overflow: hidden; background: #ff
 .preview-container { position: relative; width: 100%; display: flex; justify-content: center; }
 .baked-img { width: 100%; height: auto; max-height: 80vh; object-fit: contain; }
 
-/* Live QR Element */
-.qr-overlay-element { 
-    position: absolute; bottom: 20px; right: 20px; 
-    width: 100px; height: 100px; background: white; 
-    padding: 5px; border-radius: 4px; display: none;
-}
+.qr-overlay-element { position: absolute; bottom: 20px; right: 20px; width: 100px; height: 100px; background: white; padding: 5px; border-radius: 4px; display: none; }
 .qr-overlay-element img { width: 100%; height: 100%; }
 
-.qr-status-msg { position: absolute; top: 40%; color: white; font-weight: bold; text-align: center; font-size: 18px; }
-.corner-spinner { 
-    position: fixed; bottom: 40px; right: 40px; 
-    width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); 
-    border-top: 4px solid #ff0000; border-radius: 50%; 
-    animation: spin 1s linear infinite; 
-}
+.qr-status-msg { position: absolute; top: 40%; color: white; font-weight: bold; text-align: center; font-size: 18px; width: 100%; }
+.corner-spinner { position: fixed; bottom: 40px; right: 40px; width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.2); border-top: 4px solid #ff0000; border-radius: 50%; animation: spin 1s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-.field { margin-bottom: 15px; }
+.field { margin-bottom: 12px; }
 .field label { display: block; font-size: 11px; color: #666; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; }
-.field input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+.field input { width: 100%; padding: 12px; border: 2px solid #000; border-radius: 12px; font-size: 16px; }
 .section-title { text-align: center; margin-bottom: 20px; font-size: 22px; }
