@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SiteVerify v26.3</title>
+    <title>SiteVerify v26.4</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -16,7 +16,7 @@
             </div>
             <div class="logo-area">
                 <img src="siteverify_logo.png" alt="Logo" class="app-logo">
-                <span class="v-num">v26.3</span>
+                <span class="v-num">v26.4</span>
             </div>
             <div class="header-row-bottom">
                 <span id="location-display">🌐 Horizon Hills</span>
@@ -49,13 +49,10 @@
 
     <section id="input-screen" class="app-screen" style="display:none">
         <div class="form-container" style="text-align: center;">
-            <div class="pin-display-group">
-                <p style="font-weight: bold; margin-bottom: 5px;">Enter Security PIN:</p>
-                <div id="pin-display" style="color: red; font-size: 28px; font-weight: bold; margin-bottom: 20px;">0000</div>
-            </div>
-            <div class="field">
-                <input type="number" id="pin-verification" placeholder="Enter PIN here" style="text-align: center;">
-            </div>
+            <div class="field"><label>Job ID</label><input type="text" id="job-id-input" placeholder="NIL"></div>
+            <p style="font-weight: bold; margin: 10px 0;">Security PIN:</p>
+            <div id="pin-display" style="color: red; font-size: 24px; font-weight: bold; margin-bottom: 20px;">00000000</div>
+            <div class="field"><label>Enter PIN</label><input type="number" id="pin-verification" style="text-align: center;"></div>
             <div class="action-bar-bottom">
                 <button id="unlock-camera" class="btn-red">Unlock Camera</button>
                 <button id="cancel-init" class="btn-red">Cancel</button>
@@ -75,18 +72,16 @@
                 <div id="qr-loading-status" class="floating-status">
                     <div class="corner-spinner"></div>
                     <div class="status-text-block">
-                        <div class="gen-text">Generating the QRCode</div>
-                        <div id="logic-pulse" class="pulse-text">ID: 3 | Data: Ready</div>
+                        <div class="gen-text">Generating QRCode</div>
+                        <div id="logic-pulse" class="pulse-text">ID: 3 | Rendering</div>
                     </div>
                 </div>
             </div>
-
             <div class="action-bar-bottom" id="final-actions" style="display:none">
                 <button id="save-to-device" class="btn-red">Save to Device</button>
                 <button id="discard-btn" class="btn-red">Discard</button>
             </div>
         </div>
-
         <div class="action-bar-bottom" id="camera-controls">
             <button id="shutter" class="btn-red">Capture</button>
             <button id="cam-back" class="btn-red">Back</button>
